@@ -1,7 +1,6 @@
 package typewriter
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
 	"sort"
@@ -35,7 +34,7 @@ func (ts TemplateSet) Contains(name string) bool {
 // Returns an error if the template is not found, and panics if the template can not be parsed (per text/template.Must)
 func (ts TemplateSet) Get(name string) (t *template.Template, err error) {
 	if !ts.Contains(name) {
-		err = errors.New(fmt.Sprintf("%s is not a known template", name))
+		err = fmt.Errorf("%s is not a known template", name)
 		return
 	}
 	t = template.Must(template.New(name).Parse(ts[name].Text))
