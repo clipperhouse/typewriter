@@ -51,7 +51,7 @@ var typeWriters []TypeWriter
 // Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
 // Your program will do something like:
 //	import (
-//		"github.com/clipperhouse/gen/typewriter"
+//		"github.com/clipperhouse/typewriter"
 //		_ "github.com/clipperhouse/containerwriter"
 //	)
 func Register(tw TypeWriter) error {
