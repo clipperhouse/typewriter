@@ -141,6 +141,7 @@ Loop:
 				return l.errorf("pointer must be followed by a space or EOL")
 			}
 		case isIdentifierPrefix(r):
+			l.backup()
 			return lexTag
 		default:
 			return l.errorf("illegal leading character '%s' in tag name", string(r))
@@ -155,6 +156,7 @@ func lexTag(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
 		case isIdentifierPrefix(r):
+			l.backup()
 			return lexIdentifier(l, itemTag)
 		case r == ':':
 			if l.next() != '"' {
@@ -162,11 +164,6 @@ func lexTag(l *lexer) stateFn {
 			}
 			l.emit(itemColonQuote)
 			return lexTagValues
-		case isSpace(r):
-			l.ignore()
-		case r == '"':
-			l.emit(itemCloseQuote)
-			return lexComment
 		default:
 			return l.errorf("illegal character '%s' in tag name", string(r))
 		}
@@ -189,9 +186,9 @@ func lexTagValues(l *lexer) stateFn {
 			// parser has no use for comma, only important as delimiter here
 			l.ignore()
 		case r == '"':
-			// let lexTag handle it
-			l.backup()
-			return lexTag
+			// we're done
+			l.emit(itemCloseQuote)
+			return lexComment
 		case r == eof:
 			// we fell off the end without a close quote
 			return lexComment

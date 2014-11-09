@@ -215,7 +215,7 @@ Loop:
 			// expect colonquote
 			if p.next().typ != itemColonQuote {
 				err := &SyntaxError{
-					msg: fmt.Sprintf(`tag name must be followed by ':"', found '%s'`, item.val),
+					msg: fmt.Sprintf(`tag '%s' must be followed by ':"'`, item.val),
 					Pos: item.pos,
 				}
 				return false, nil, err
