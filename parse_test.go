@@ -132,6 +132,7 @@ func TestParse(t *testing.T) {
 				}},
 			}, false},
 		}, true},
+		{`// +test foo:"bar,Baz`, false, nil, false},
 		{`// +test foo:"bar,-Baz"`, false, nil, false},
 		{`// +test foo:"bar,Baz-"`, false, nil, false},
 		{`// +test foo:bar,Baz" qux:"stuff"`, false, nil, false},

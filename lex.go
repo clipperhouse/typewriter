@@ -241,6 +241,9 @@ Loop:
 		case isSpace(r) || r == ',':
 			// legal delimiters for multiple type parameters
 			break Loop
+		case r == '"':
+			// premature closing quote
+			break Loop
 		default:
 			// anything else is illegal
 			return l.errorf("illegal character '%c' in type declaration", r)
