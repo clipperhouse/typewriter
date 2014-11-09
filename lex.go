@@ -208,6 +208,7 @@ func lexTypeParameters(l *lexer) stateFn {
 			}
 			return l.errorf("additional close bracket")
 		case isTypeDecl(r):
+			l.backup()
 			return lexTypeDeclaration
 		case isSpace(r) || r == ',':
 			l.ignore()
@@ -331,5 +332,5 @@ func isIdentifierPrefix(r rune) bool {
 // isTypeDecl reports whether r a character legal in a type declaration, eg map[*Thing]interface{}
 // brackets are a special case, handled in lexTypeParameter
 func isTypeDecl(r rune) bool {
-	return r == '*' || r == '{' || r == '}' || isAlphaNumeric(r)
+	return r == '*' || r == '{' || r == '}' || r == '[' || r == ']' || isAlphaNumeric(r)
 }

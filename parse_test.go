@@ -97,6 +97,14 @@ func TestParse(t *testing.T) {
 				{"qux", nil},
 			}, false},
 		}, true},
+		{`// +test foo:"bar,Baz[[]qaz]"`, false, Tags{
+			{"foo", []TagValue{
+				{"bar", nil},
+				{"Baz", []Type{
+					Type{Name: "[]qaz"},
+				}},
+			}, false},
+		}, true},
 		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, Tags{
 			{"foo", []TagValue{
 				{"bar", nil},
@@ -136,6 +144,9 @@ func TestParse(t *testing.T) {
 		{`// +test *foo:"bar,Baz" qux:"stuff"`, false, nil, false},
 		{`// +test foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
 		{`// +test * foo:"bar,Baz" * qux:"stuff"`, false, nil, false},
+		{`// +test foo:"bar,Baz[foo"`, false, nil, false},
+		{`// +test foo:"bar,Baz[foo]]"`, false, nil, false},
+		{`// +test foo:"bar,Baz[[]foo"`, false, nil, false},
 	}
 
 	for i, test := range tests {
