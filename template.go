@@ -7,16 +7,17 @@ import (
 )
 
 // Template includes the text of a template as well as requirements for the types to which it can be applied.
+// +gen * slice:"Where"
 type Template struct {
-	Text           string
+	Name, Text     string
 	TypeConstraint Constraint
 	// Indicates both the number of required type parameters, and the constraints of each (if any)
 	TypeParameterConstraints []Constraint
 }
 
-func (tmpl *Template) tryTypeAndValue(t Type, v TagValue) error {
+func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.tryType(t); err != nil {
-		return fmt.Errorf("cannot implement %s: %s", v, err)
+		return fmt.Errorf("cannot implement %s on %: %s", v, t, err)
 	}
 
 	if len(tmpl.TypeParameterConstraints) != len(v.TypeParameters) {
@@ -34,20 +35,28 @@ func (tmpl *Template) tryTypeAndValue(t Type, v TagValue) error {
 	return nil
 }
 
-// TemplateSet is a map of string names to Template.
-type TemplateSet map[string]*Template
+// Get attempts to locate a template which meets type constraints, and parses it
+func (ts TemplateSlice) Get(t Type, v TagValue) (*template.Template, error) {
+	// a bit of poor-man's type resolution here
 
-// Get attempts to 1) locate a template of that name and 2) parse the template
-func (ts TemplateSet) Get(v TagValue) (*template.Template, error) {
-	return ts.ByName(v.TemplateKey())
-}
+	// templates which might work
+	candidates := ts.Where(func(tmpl *Template) bool {
+		return tmpl.Name == v.Name
+	})
 
-// Get attempts to 1) locate a template of that name and 2) parse the template
-func (ts TemplateSet) ByName(name string) (*template.Template, error) {
-	tmpl, found := ts[name]
-	if !found {
-		err := fmt.Errorf("%s is not a known template", name)
+	if len(candidates) == 0 {
+		err := fmt.Errorf("%s is unknown", v.Name)
 		return nil, err
 	}
-	return template.New(name).Parse(tmpl.Text)
+
+	// try to find one that meets type constraints
+	for _, tmpl := range candidates {
+		if err := tmpl.TryTypeAndValue(t, v); err == nil {
+			// eagerly return on success
+			return template.New(v.String()).Parse(tmpl.Text)
+		}
+	}
+
+	// send back the first error message; not great but OK most of the time
+	return nil, candidates[0].TryTypeAndValue(t, v)
 }
