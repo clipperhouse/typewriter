@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// +gen methods:"Where"
+// +gen slice:"Where"
 type Tag struct {
 	Name    string
 	Values  []TagValue
@@ -43,7 +43,7 @@ func (v TagValue) TemplateKey() string {
 	return v.Name + "[" + strings.Join(a, ",") + "]"
 }
 
-func (ts Tags) ByName(name string) (result Tag, found bool, err error) {
+func (ts TagSlice) ByName(name string) (result Tag, found bool, err error) {
 	tags := ts.Where(func(t Tag) bool {
 		return t.Name == name
 	})

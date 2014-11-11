@@ -157,9 +157,9 @@ func (p *parsr) peek() item {
 	return p.token[0]
 }
 
-func parse(input, directive string, evaluator evaluator) (Pointer, Tags, error) {
+func parse(input, directive string, evaluator evaluator) (Pointer, TagSlice, error) {
 	var pointer Pointer
-	var tags Tags
+	var tags TagSlice
 	p := &parsr{
 		lex:       lex(input),
 		evaluator: evaluator,

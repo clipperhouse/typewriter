@@ -12,7 +12,7 @@ type Type struct {
 	Package                      *Package
 	Pointer                      Pointer
 	Name                         string
-	Tags                         Tags
+	Tags                         TagSlice
 	comparable, numeric, ordered bool
 	test                         test
 	types.Type

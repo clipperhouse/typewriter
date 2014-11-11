@@ -49,25 +49,25 @@ func TestFindDirective(t *testing.T) {
 type parseTest struct {
 	comment string
 	pointer Pointer
-	tags    Tags
+	tags    TagSlice
 	valid   bool
 }
 
 func TestParse(t *testing.T) {
 	tests := []parseTest{
-		{`// +test foo:"bar,Baz"`, false, Tags{
+		{`// +test foo:"bar,Baz"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", nil},
 			}, false},
 		}, true},
-		{`// +test * foo:"bar,Baz"`, true, Tags{
+		{`// +test * foo:"bar,Baz"`, true, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"bar,Baz" qux:"stuff"`, false, Tags{
+		{`// +test foo:"bar,Baz" qux:"stuff"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", nil},
@@ -76,19 +76,19 @@ func TestParse(t *testing.T) {
 				{"stuff", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"-bar,Baz"`, false, Tags{
+		{`// +test foo:"-bar,Baz"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", nil},
 			}, true},
 		}, true},
-		{`// +test foo:"bar  ,Baz "  `, false, Tags{
+		{`// +test foo:"bar  ,Baz "  `, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"bar,Baz[qaz], qux"`, false, Tags{
+		{`// +test foo:"bar,Baz[qaz], qux"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", []Type{
@@ -97,7 +97,7 @@ func TestParse(t *testing.T) {
 				{"qux", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"bar,Baz[[]qaz]"`, false, Tags{
+		{`// +test foo:"bar,Baz[[]qaz]"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", []Type{
@@ -105,7 +105,7 @@ func TestParse(t *testing.T) {
 				}},
 			}, false},
 		}, true},
-		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, Tags{
+		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
 				{"Baz", []Type{
@@ -117,7 +117,7 @@ func TestParse(t *testing.T) {
 				{"stuff", nil},
 			}, false},
 		}, true},
-		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, Tags{
+		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"Baz", []Type{
 					Type{Name: "qaz"},
@@ -170,7 +170,7 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func tagsEqual(tags, other Tags) bool {
+func tagsEqual(tags, other TagSlice) bool {
 	if len(tags) != len(other) {
 		return false
 	}
@@ -304,7 +304,7 @@ func TestGetTypes(t *testing.T) {
 	app := m["app"]
 
 	if len(app.Tags) != 2 {
-		t.Errorf("typ should have 2 Tags, found %v", len(app.Tags))
+		t.Errorf("typ should have 2 TagSlice, found %v", len(app.Tags))
 	}
 
 	if len(app.Tags[0].Values) != 1 {
