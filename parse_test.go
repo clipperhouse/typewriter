@@ -38,7 +38,7 @@ func TestFindDirective(t *testing.T) {
 		g := &ast.CommentGroup{
 			List: []*ast.Comment{{Text: test.text}},
 		}
-		c := findDirective(g, "+test")
+		c := findAnnotation(g, "+test")
 		found := c != nil
 		if found != test.found {
 			t.Errorf("[test %v] found should have been %v for:\n%s", i, test.found, test.text)
