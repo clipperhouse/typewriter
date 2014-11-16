@@ -175,7 +175,7 @@ func tagsEqual(tags, other TagSlice) bool {
 		return false
 	}
 
-	for i, _ := range tags {
+	for i := range tags {
 		t := tags[i]
 		o := other[i]
 
@@ -191,7 +191,7 @@ func tagsEqual(tags, other TagSlice) bool {
 			return false
 		}
 
-		for j, _ := range t.Values {
+		for j := range t.Values {
 			tv := t.Values[j]
 			ov := o.Values[j]
 
@@ -203,7 +203,7 @@ func tagsEqual(tags, other TagSlice) bool {
 				return false
 			}
 
-			for k, _ := range tv.TypeParameters {
+			for k := range tv.TypeParameters {
 				if tv.TypeParameters[k].String() != ov.TypeParameters[k].String() {
 					return false
 				}
