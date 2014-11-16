@@ -15,7 +15,7 @@ func TestEval(t *testing.T) {
 
 	p := a.Types[0].Package
 
-	s1 := "app"
+	s1 := "App"
 	t1, err1 := p.Eval(s1)
 
 	if err1 != nil {
@@ -38,7 +38,7 @@ func TestEval(t *testing.T) {
 		t.Errorf("'app' is not an ordered type")
 	}
 
-	s2 := "*app"
+	s2 := "*App"
 	t2, err2 := p.Eval(s2)
 
 	if err2 != nil {

@@ -90,7 +90,7 @@ func TestNewAppFiltered(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	a := &app{
+	a := &App{
 		Directive: "+test",
 	}
 

@@ -229,7 +229,7 @@ func TestGetTypes(t *testing.T) {
 	// put 'em into a map for convenience
 	m := typeSliceToMap(typs)
 
-	if _, found := m["app"]; !found {
+	if _, found := m["App"]; !found {
 		t.Errorf("should have found the app type")
 	}
 
@@ -301,7 +301,7 @@ func TestGetTypes(t *testing.T) {
 
 	// check tag existence at a high level here, see also tag parsing tests
 
-	app := m["app"]
+	app := m["App"]
 
 	if len(app.Tags) != 2 {
 		t.Errorf("typ should have 2 TagSlice, found %v", len(app.Tags))
@@ -341,7 +341,7 @@ func TestGetTypes(t *testing.T) {
 		t.Errorf("should not have found the dummy type")
 	}
 
-	if _, found := m2["app"]; !found {
+	if _, found := m2["App"]; !found {
 		t.Errorf("should have found the app type")
 	}
 
