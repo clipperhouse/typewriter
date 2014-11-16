@@ -13,7 +13,7 @@ func TestEval(t *testing.T) {
 		return // we got problems, continuing will panic
 	}
 
-	p := a.Types[0].Package
+	p := a.Packages[0]
 
 	s1 := "App"
 	t1, err1 := p.Eval(s1)

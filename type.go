@@ -7,7 +7,6 @@ import (
 )
 
 type Type struct {
-	Package                      *Package
 	Pointer                      Pointer
 	Name                         string
 	Tags                         TagSlice

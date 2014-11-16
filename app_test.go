@@ -46,9 +46,11 @@ func TestNewApp(t *testing.T) {
 		t.Error(err1)
 	}
 
+	p1 := a1.Packages[0]
+
 	// app and dummy types
-	if len(a1.Types) != 4 {
-		t.Errorf("should have found 4 types, found %v", len(a1.Types))
+	if len(p1.Types) != 4 {
+		t.Errorf("should have found 4 types, found %v", len(p1.Types))
 	}
 
 	// this merely tests that they've been assigned to the app
@@ -71,9 +73,11 @@ func TestNewAppFiltered(t *testing.T) {
 		t.Error(err1)
 	}
 
+	p1 := a1.Packages[0]
+
 	// dummy is filtered out
-	if len(a1.Types) != 1 {
-		t.Errorf("should have found 1 types, found %v", len(a1.Types))
+	if len(p1.Types) != 1 {
+		t.Errorf("should have found 1 types, found %v", len(p1.Types))
 	}
 
 	// should fail if types can't be evaluated
@@ -94,13 +98,14 @@ func TestWrite(t *testing.T) {
 		Directive: "+test",
 	}
 
+	p := NewPackage("dummy", "somepkg")
+
 	typ := Type{
-		Name:    "sometype",
-		Package: NewPackage("dummy", "somepkg"),
+		Name: "sometype",
 	}
 
 	var b bytes.Buffer
-	write(&b, a, typ, &fooWriter{})
+	write(&b, a, p, typ, &fooWriter{})
 
 	// make sure the critical bits actually get written
 
@@ -145,6 +150,8 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err)
 	}
 
+	p1 := a1.Packages[0]
+
 	written, err = a1.WriteAll()
 	cleanup(written) // we don't need the written files
 
@@ -152,12 +159,12 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if fw1.writeHeaderCalls != len(a1.Types) {
-		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeHeaderCalls)
+	if fw1.writeHeaderCalls != len(p1.Types) {
+		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(p1.Types), fw.writeHeaderCalls)
 	}
 
-	if fw1.writeCalls != len(a1.Types) {
-		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(a1.Types), fw.writeCalls)
+	if fw1.writeCalls != len(p1.Types) {
+		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(p1.Types), fw.writeCalls)
 	}
 
 	// clear 'em out

@@ -17,8 +17,7 @@ type eval struct{}
 
 func (eval) Eval(name string) (Type, error) {
 	return Type{
-		Name:    name,
-		Package: NewPackage("dummy", "dummy"),
+		Name: name,
 	}, nil
 }
 
@@ -216,11 +215,13 @@ func tagsEqual(tags, other TagSlice) bool {
 
 func TestGetTypes(t *testing.T) {
 	// app and dummy types are marked up with +test
-	typs, err := getTypes("+test", nil)
+	pkgs, err := getPackages("+test", nil)
 
 	if err != nil {
 		t.Error(err)
 	}
+
+	typs := pkgs[0].Types
 
 	if len(typs) != 4 {
 		t.Errorf("should have found the 4 marked-up types, found %v", len(typs))
@@ -325,11 +326,13 @@ func TestGetTypes(t *testing.T) {
 		return !strings.HasPrefix(f.Name(), "dummy")
 	}
 
-	typs2, err2 := getTypes("+test", filter)
+	pkgs2, err2 := getPackages("+test", filter)
 
 	if err2 != nil {
 		t.Error(err2)
 	}
+
+	typs2 := pkgs2[0].Types
 
 	if len(typs2) != 1 {
 		t.Errorf("should have found the 1 marked-up type when filtered, found %v", len(typs2))
@@ -346,7 +349,9 @@ func TestGetTypes(t *testing.T) {
 	}
 
 	// no false positives
-	typs3, err3 := getTypes("+notreal", nil)
+	pkgs3, err3 := getPackages("+notreal", nil)
+
+	typs3 := pkgs3[0].Types
 
 	if len(typs3) != 0 {
 		t.Errorf("should have no marked-up types for +notreal")
@@ -363,7 +368,7 @@ func TestGetTypes(t *testing.T) {
 		return f.Name() == "package.go"
 	}
 
-	_, err4 := getTypes("+test", filter4)
+	_, err4 := getPackages("+test", filter4)
 
 	if err4 == nil {
 		t.Error("should have been unable to evaluate types of incomplete package")

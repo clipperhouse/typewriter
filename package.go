@@ -16,11 +16,13 @@ type evaluator interface {
 
 type Package struct {
 	*types.Package
+	Types []Type
 }
 
 func NewPackage(path, name string) *Package {
 	return &Package{
 		types.NewPackage(path, name),
+		[]Type{},
 	}
 }
 
@@ -37,7 +39,7 @@ func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
 		return nil, err
 	}
 
-	return &Package{typesPkg}, nil
+	return &Package{typesPkg, []Type{}}, nil
 }
 
 func (p *Package) Eval(name string) (Type, error) {
@@ -49,7 +51,6 @@ func (p *Package) Eval(name string) (Type, error) {
 	}
 
 	result = Type{
-		Package:    p,
 		Pointer:    isPointer(t),
 		Name:       strings.TrimLeft(name, Pointer(true).String()), // trims the * if it exists
 		comparable: isComparable(t),

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
+func getPackages(directive string, filter func(os.FileInfo) bool) ([]*Package, error) {
 	// get the AST
 	fset := token.NewFileSet()
 	astPkgs, err := parser.ParseDir(fset, "./", filter, parser.ParseComments)
@@ -18,7 +18,7 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 		return nil, err
 	}
 
-	var typs []Type
+	var pkgs []*Package
 
 	for _, a := range astPkgs {
 		pkg, err := getPackage(fset, a)
@@ -26,6 +26,8 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		pkgs = append(pkgs, pkg)
 
 		specs := getTaggedComments(a, directive)
 
@@ -53,11 +55,11 @@ func getTypes(directive string, filter func(os.FileInfo) bool) ([]Type, error) {
 			typ.Tags = tags
 			typ.test = test(strings.HasSuffix(fset.Position(s.Pos()).Filename, "_test.go"))
 
-			typs = append(typs, typ)
+			pkg.Types = append(pkg.Types, typ)
 		}
 	}
 
-	return typs, nil
+	return pkgs, nil
 }
 
 // getTaggedComments walks the AST and returns types which have directive comment
