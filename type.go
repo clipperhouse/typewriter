@@ -29,22 +29,22 @@ func (t Type) String() (result string) {
 	return fmt.Sprintf("%s%s", t.Pointer.String(), t.Name)
 }
 
-func (t *Type) Comparable() bool {
+func (t Type) Comparable() bool {
 	return t.comparable
 }
 
-func (t *Type) Numeric() bool {
+func (t Type) Numeric() bool {
 	return t.numeric
 }
 
-func (t *Type) Ordered() bool {
+func (t Type) Ordered() bool {
 	return t.ordered
 }
 
-func (typ Type) LongName() string {
+func (t Type) LongName() string {
 	name := ""
 	r := regexp.MustCompile(`[\[\]{}*]`)
-	els := r.Split(typ.String(), -1)
+	els := r.Split(t.String(), -1)
 	for _, s := range els {
 		name += strings.Title(s)
 	}
