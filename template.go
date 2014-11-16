@@ -17,7 +17,7 @@ type Template struct {
 
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.tryType(t); err != nil {
-		return fmt.Errorf("cannot implement %s on %: %s", v, t, err)
+		return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
 	}
 
 	if len(tmpl.TypeParameterConstraints) != len(v.TypeParameters) {
