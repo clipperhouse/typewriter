@@ -137,19 +137,6 @@ func write(w *bytes.Buffer, a *App, p *Package, t Type, tw TypeWriter) (n int, e
 	w.Write([]byte(byline))
 	w.Write(twoLines)
 
-	// we only care about written bytes for WriteHeader and WriteBody
-	var c countingWriter
-
-	c = countingWriter{0, w}
-	err = tw.WriteHeader(&c, t)
-	n += c.n
-
-	if err != nil {
-		return n, err
-	}
-
-	w.Write(twoLines)
-
 	// add a package declaration
 	pkg := fmt.Sprintf("package %s", p.Name())
 	w.Write([]byte(pkg))
@@ -159,8 +146,8 @@ func write(w *bytes.Buffer, a *App, p *Package, t Type, tw TypeWriter) (n int, e
 		return n, err
 	}
 
-	c = countingWriter{0, w}
-	err = tw.WriteBody(&c, t)
+	c := countingWriter{0, w}
+	err = tw.Write(&c, t)
 	n += c.n
 
 	return n, err

@@ -111,10 +111,6 @@ func TestWrite(t *testing.T) {
 
 	s := b.String()
 
-	if !strings.Contains(s, "licensing") {
-		t.Errorf("WriteHeader did not write 'licensing' as expected")
-	}
-
 	if !strings.Contains(s, "package somepkg") {
 		t.Errorf("package declaration did not get written")
 	}
@@ -159,10 +155,6 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if fw1.writeHeaderCalls != len(p1.Types) {
-		t.Errorf(".WriteHeader() should have been called %v times (once for each type); was called %v", len(p1.Types), fw.writeHeaderCalls)
-	}
-
 	if fw1.writeCalls != len(p1.Types) {
 		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(p1.Types), fw.writeCalls)
 	}
@@ -189,28 +181,16 @@ func TestWriteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if fw.writeHeaderCalls != 0 {
-		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
-	}
-
-	if bw.writeHeaderCalls != 0 {
-		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", bw.writeHeaderCalls)
-	}
-
-	if ew.writeHeaderCalls != 0 {
-		t.Errorf(".WriteHeader() should have been called no times due to error in validation; was called %v", ew.writeHeaderCalls)
-	}
-
 	if fw.writeCalls != 0 {
-		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", fw.writeHeaderCalls)
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", fw.writeCalls)
 	}
 
 	if bw.writeCalls != 0 {
-		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", bw.writeHeaderCalls)
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", bw.writeCalls)
 	}
 
 	if ew.writeCalls != 0 {
-		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", ew.writeHeaderCalls)
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", ew.writeCalls)
 	}
 
 	// clear 'em out
@@ -240,17 +220,11 @@ func TestWriteAll(t *testing.T) {
 }
 
 type fooWriter struct {
-	writeHeaderCalls, writeCalls int
+	writeCalls int
 }
 
 func (f *fooWriter) Name() string {
 	return "foo"
-}
-
-func (f *fooWriter) WriteHeader(w io.Writer, t Type) error {
-	f.writeHeaderCalls++
-	w.Write([]byte("// some licensing stuff"))
-	return nil
 }
 
 func (f *fooWriter) Imports(t Type) []ImportSpec {
@@ -261,7 +235,7 @@ func (f *fooWriter) Imports(t Type) []ImportSpec {
 	return imports
 }
 
-func (f *fooWriter) WriteBody(w io.Writer, t Type) error {
+func (f *fooWriter) Write(w io.Writer, t Type) error {
 	f.writeCalls++
 	w.Write([]byte(fmt.Sprintf(`func pointless%s(){
 		fmt.Println("pointless!")
@@ -270,45 +244,35 @@ func (f *fooWriter) WriteBody(w io.Writer, t Type) error {
 }
 
 type barWriter struct {
-	writeHeaderCalls, writeCalls int
+	writeCalls int
 }
 
 func (f *barWriter) Name() string {
 	return "bar"
 }
 
-func (f *barWriter) WriteHeader(w io.Writer, t Type) error {
-	f.writeHeaderCalls++
-	return nil
-}
-
 func (f *barWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *barWriter) WriteBody(w io.Writer, t Type) error {
+func (f *barWriter) Write(w io.Writer, t Type) error {
 	f.writeCalls++
 	return nil
 }
 
 type errWriter struct {
-	writeHeaderCalls, writeCalls int
+	writeCalls int
 }
 
 func (f *errWriter) Name() string {
 	return "err"
 }
 
-func (f *errWriter) WriteHeader(w io.Writer, t Type) error {
-	f.writeHeaderCalls++
-	return nil
-}
-
 func (f *errWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *errWriter) WriteBody(w io.Writer, t Type) error {
+func (f *errWriter) Write(w io.Writer, t Type) error {
 	f.writeCalls++
 	return nil
 }
@@ -319,15 +283,11 @@ func (f *junkWriter) Name() string {
 	return "junk"
 }
 
-func (f *junkWriter) WriteHeader(w io.Writer, t Type) error {
-	return nil
-}
-
 func (f *junkWriter) Imports(t Type) (result []ImportSpec) {
 	return result
 }
 
-func (f *junkWriter) WriteBody(w io.Writer, t Type) error {
+func (f *junkWriter) Write(w io.Writer, t Type) error {
 	w.Write([]byte("this is invalid Go code, innit?"))
 	return nil
 }
