@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"golang.org/x/tools/go/types"
 )
 
 type Type struct {
@@ -15,7 +13,6 @@ type Type struct {
 	Tags                         TagSlice
 	comparable, numeric, ordered bool
 	test                         test
-	types.Type
 }
 
 type test bool
