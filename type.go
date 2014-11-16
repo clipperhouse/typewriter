@@ -29,18 +29,6 @@ func (t Type) String() (result string) {
 	return fmt.Sprintf("%s%s", t.Pointer.String(), t.Name)
 }
 
-func (t Type) Comparable() bool {
-	return t.comparable
-}
-
-func (t Type) Numeric() bool {
-	return t.numeric
-}
-
-func (t Type) Ordered() bool {
-	return t.ordered
-}
-
 func (t Type) LongName() string {
 	name := ""
 	r := regexp.MustCompile(`[\[\]{}*]`)

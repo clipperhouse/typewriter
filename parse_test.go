@@ -251,15 +251,15 @@ func TestGetTypes(t *testing.T) {
 
 	dummy := m["dummy"]
 
-	if !dummy.Comparable() {
+	if !dummy.comparable {
 		t.Errorf("dummy type should be comparable")
 	}
 
-	if !dummy.Ordered() {
+	if !dummy.ordered {
 		t.Errorf("dummy type should be ordered")
 	}
 
-	if !dummy.Numeric() {
+	if !dummy.numeric {
 		t.Errorf("dummy type should be numeric")
 	}
 
@@ -273,29 +273,29 @@ func TestGetTypes(t *testing.T) {
 
 	dummy2 := m["dummy2"]
 
-	if dummy2.Comparable() {
+	if dummy2.comparable {
 		t.Errorf("dummy2 type should not be comparable")
 	}
 
-	if dummy2.Ordered() {
+	if dummy2.ordered {
 		t.Errorf("dummy2 type should not be ordered")
 	}
 
-	if dummy2.Numeric() {
+	if dummy2.numeric {
 		t.Errorf("dummy2 type should not be numeric")
 	}
 
 	dummy3 := m["dummy3"]
 
-	if !dummy3.Comparable() {
+	if !dummy3.comparable {
 		t.Errorf("dummy3 type should be comparable")
 	}
 
-	if !dummy3.Ordered() {
+	if !dummy3.ordered {
 		t.Errorf("dummy3 type should be ordered")
 	}
 
-	if dummy3.Numeric() {
+	if dummy3.numeric {
 		t.Errorf("dummy3 type should not be numeric")
 	}
 
