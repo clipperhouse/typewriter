@@ -5,6 +5,7 @@ import (
 	"go/token"
 	"strings"
 
+	// gcimporter implements Import for gc-generated files
 	_ "golang.org/x/tools/go/gcimporter"
 	"golang.org/x/tools/go/types"
 )

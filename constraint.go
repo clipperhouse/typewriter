@@ -2,6 +2,7 @@ package typewriter
 
 import "fmt"
 
+// Constraint describes type requirements
 type Constraint struct {
 	// A numeric type is one that supports supports arithmetic operations.
 	Numeric bool

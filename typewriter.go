@@ -4,6 +4,7 @@ import (
 	"io"
 )
 
+// TypeWriter is the interface to be implemented for code generation via gen
 type TypeWriter interface {
 	Name() string
 	// WriteHeader writer to the top of the generated code, before the package declaration; intended for licenses or general documentation.
