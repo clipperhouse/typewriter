@@ -40,12 +40,14 @@ func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
 	return &Package{typesPkg}, nil
 }
 
-func (p *Package) Eval(name string) (result Type, err error) {
-	t, _, typesErr := types.Eval(name, p.Package, p.Scope())
-	if typesErr != nil {
-		err = typesErr
-		return
+func (p *Package) Eval(name string) (Type, error) {
+	var result Type
+
+	t, _, err := types.Eval(name, p.Package, p.Scope())
+	if err != nil {
+		return result, err
 	}
+
 	result = Type{
 		Package:    p,
 		Pointer:    isPointer(t),
@@ -54,5 +56,6 @@ func (p *Package) Eval(name string) (result Type, err error) {
 		numeric:    isNumeric(t),
 		ordered:    isOrdered(t),
 	}
-	return
+
+	return result, nil
 }
