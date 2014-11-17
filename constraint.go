@@ -2,9 +2,9 @@ package typewriter
 
 import "fmt"
 
-// Constraint describes type requirements
+// Constraint describes type requirements.
 type Constraint struct {
-	// A numeric type is one that supports supports arithmetic operations.
+	// A numeric type is one that supports arithmetic operations.
 	Numeric bool
 	// A comparable type is one that supports the == operator. Map keys must be comparable, for example.
 	Comparable bool

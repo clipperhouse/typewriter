@@ -1,3 +1,8 @@
+// The typewriter package provides a framework for type-driven code generation. It implements the core functionality of gen.
+//
+// This package is primarily of interest to those who wish to extend gen with third-party functionality.
+//
+// More docs are available at https://clipperhouse.github.io/gen/typewriters.
 package typewriter
 
 import (

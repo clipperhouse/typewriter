@@ -14,7 +14,10 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-// App is the high-level object for generating files
+// App is the high-level construct for package-level code generation. Typical usage is along the lines of:
+//	app, err := typewriter.NewApp()
+//	err := app.WriteAll()
+//
 // +test foo:"Bar" baz:"qux[struct{}],thing"
 type App struct {
 	// All typewriter.Package found in the current directory.
@@ -24,7 +27,7 @@ type App struct {
 	Directive   string
 }
 
-// NewApp parses the current directory, collecting Types and their related information.
+// NewApp parses the current directory, enumerating registered TypeWriters and collecting Types and their related information.
 func NewApp(directive string) (*App, error) {
 	return NewAppFiltered(directive, nil)
 }
