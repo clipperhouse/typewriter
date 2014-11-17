@@ -17,7 +17,7 @@ type Template struct {
 
 // TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
-	if err := tmpl.TypeConstraint.tryType(t); err != nil {
+	if err := tmpl.TypeConstraint.TryType(t); err != nil {
 		return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
 	}
 
@@ -28,7 +28,7 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	for i := range v.TypeParameters {
 		c := tmpl.TypeParameterConstraints[i]
 		tp := v.TypeParameters[i]
-		if err := c.tryType(tp); err != nil {
+		if err := c.TryType(tp); err != nil {
 			return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
 		}
 	}

@@ -16,11 +16,11 @@ func TestTryType(t *testing.T) {
 				Ordered:    j == 2,
 			}
 
-			err := c.tryType(typ)
+			err := c.TryType(typ)
 			should := i == j
 
 			if should != (err == nil) {
-				t.Errorf("tryType is incorrect when for Type %v on Constraint %v; should be %v", typ, c, should)
+				t.Errorf("TryType is incorrect when for Type %v on Constraint %v; should be %v", typ, c, should)
 			}
 		}
 	}

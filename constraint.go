@@ -12,7 +12,7 @@ type Constraint struct {
 	Ordered bool
 }
 
-func (c Constraint) tryType(t Type) error {
+func (c Constraint) TryType(t Type) error {
 	if c.Comparable && !t.comparable {
 		return fmt.Errorf("%s must be comparable (i.e. supports == and != operators)", t)
 	}
