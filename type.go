@@ -28,14 +28,21 @@ func (t Type) String() (result string) {
 	return fmt.Sprintf("%s%s", t.Pointer.String(), t.Name)
 }
 
+// LongName provides a name that may be useful for generated names.
+// For example, map[string]Foo becomes MapStringFoo.
 func (t Type) LongName() string {
-	name := ""
+	s := strings.Replace(t.String(), "[]", "Slice[]", -1) // hacktastic
+
 	r := regexp.MustCompile(`[\[\]{}*]`)
-	els := r.Split(t.String(), -1)
+	els := r.Split(s, -1)
+
+	var parts []string
+
 	for _, s := range els {
-		name += strings.Title(s)
+		parts = append(parts, strings.Title(s))
 	}
-	return name
+
+	return strings.Join(parts, "")
 }
 
 // Pointer exists as a type to allow simple use as bool or as String, which returns *
