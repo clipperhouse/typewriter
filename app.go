@@ -52,7 +52,7 @@ func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*App, erro
 var typeWriters []TypeWriter
 
 // Register allows template packages to make themselves known to a 'parent' package, usually in the init() func.
-// Comparable to the approach taken by builtin image package for registration of image types (eg image/png).
+// Comparable to the approach taken by stdlib's image package for registration of image types (eg image/png).
 // Your program will do something like:
 //	import (
 //		"github.com/clipperhouse/typewriter"

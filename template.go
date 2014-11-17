@@ -15,6 +15,7 @@ type Template struct {
 	TypeParameterConstraints []Constraint
 }
 
+// TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.tryType(t); err != nil {
 		return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
@@ -35,7 +36,7 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	return nil
 }
 
-// Get attempts to locate a template which meets type constraints, and parses it
+// Get attempts to locate a template which meets type constraints, and parses it.
 func (ts TemplateSlice) Get(t Type, v TagValue) (*template.Template, error) {
 	// a bit of poor-man's type resolution here
 
