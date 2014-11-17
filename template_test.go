@@ -1,6 +1,9 @@
 package typewriter
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestTryTypeAndValue(t *testing.T) {
 	// no constraints
@@ -139,5 +142,135 @@ func TestTryTypeAndValue(t *testing.T) {
 
 	if err6 == nil {
 		t.Error("TryTypeAndValue should have returned an error")
+	}
+}
+
+func TestGet(t *testing.T) {
+	// template exists, no constraints
+	slice1 := TemplateSlice{
+		{
+			Name: "TestValue",
+			Text: "This should compile.",
+		},
+		{
+			Name: "SomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ1 := Type{
+		Name: "TestType",
+	}
+
+	v1 := TagValue{
+		Name: "TestValue",
+	}
+
+	_, err1 := slice1.Get(typ1, v1)
+
+	if err1 != nil {
+		t.Error(err1)
+	}
+
+	// template doesn't exist
+	slice2 := TemplateSlice{
+		{
+			Name: "SomethingElse",
+			Text: "This should compile.",
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ2 := Type{
+		Name: "TestType",
+	}
+
+	v2 := TagValue{
+		Name: "TestValue",
+	}
+
+	_, err2 := slice2.Get(typ2, v2)
+
+	if err2 == nil {
+		t.Error("should return an error for not found")
+	}
+
+	// template name exists but type parameters are wrong
+	slice3 := TemplateSlice{
+		{
+			Name: "TestValue",
+			Text: "This should compile.",
+			TypeParameterConstraints: []Constraint{
+				{Numeric: true},
+			},
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ3 := Type{
+		Name: "TestType",
+	}
+
+	v3 := TagValue{
+		Name: "TestValue",
+	}
+
+	_, err3 := slice3.Get(typ3, v3)
+
+	if err3 == nil {
+		t.Error("should return an error for not found")
+	}
+
+	// multiple exist, only one matches type constraints
+	slice4 := TemplateSlice{
+		{
+			Name: "TestValue",
+			Text: "This should compile.",
+			TypeParameterConstraints: []Constraint{
+				{Numeric: true},
+			},
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+		{
+			Name: "TestValue",
+			Text: "This should be found.",
+			TypeParameterConstraints: []Constraint{
+				{Ordered: true},
+			},
+		},
+	}
+
+	typ4 := Type{
+		Name: "TestType",
+	}
+
+	v4 := TagValue{
+		Name: "TestValue",
+		TypeParameters: []Type{
+			{Name: "bar", ordered: true},
+		},
+	}
+
+	tmpl4, err4 := slice4.Get(typ4, v4)
+
+	if err4 != nil {
+		t.Error(err4)
+	}
+
+	// ensure that we got the right template
+	var b bytes.Buffer
+	tmpl4.Execute(&b, nil)
+
+	if b.String() != slice4[2].Text { // "This should be found."
+		t.Error("should have picked the template which matches type constraints")
 	}
 }
