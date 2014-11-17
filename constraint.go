@@ -14,7 +14,7 @@ type Constraint struct {
 
 func (c Constraint) TryType(t Type) error {
 	if c.Comparable && !t.comparable {
-		return fmt.Errorf("%s must be comparable (i.e. supports == and != operators)", t)
+		return fmt.Errorf("%s must be comparable (i.e. support == and !=)", t)
 	}
 
 	if c.Numeric && !t.numeric {
@@ -22,7 +22,7 @@ func (c Constraint) TryType(t Type) error {
 	}
 
 	if c.Ordered && !t.ordered {
-		return fmt.Errorf("%s must be ordered (i.e. supports > and < operators)", t)
+		return fmt.Errorf("%s must be ordered (i.e. support > and <)", t)
 	}
 
 	return nil

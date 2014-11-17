@@ -18,18 +18,18 @@ type Template struct {
 // TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.TryType(t); err != nil {
-		return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
+		return fmt.Errorf("cannot apply %s to %s: %s", v, t, err)
 	}
 
 	if len(tmpl.TypeParameterConstraints) != len(v.TypeParameters) {
-		return fmt.Errorf("%s requires %d type parameters", v.Name, len(tmpl.TypeParameterConstraints))
+		return fmt.Errorf("%s requires %d type parameters", v.Name, len(v.TypeParameters))
 	}
 
 	for i := range v.TypeParameters {
 		c := tmpl.TypeParameterConstraints[i]
 		tp := v.TypeParameters[i]
 		if err := c.TryType(tp); err != nil {
-			return fmt.Errorf("cannot implement %s on %s: %s", v, t, err)
+			return fmt.Errorf("cannot apply %s on %s: %s", v, t, err)
 		}
 	}
 
