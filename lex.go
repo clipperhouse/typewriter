@@ -164,6 +164,9 @@ func lexTag(l *lexer) stateFn {
 			}
 			l.emit(itemColonQuote)
 			return lexTagValues
+		case isSpace(r) || r == eof:
+			l.backup()
+			return lexComment
 		default:
 			return l.errorf("illegal character '%s' in tag name", string(r))
 		}

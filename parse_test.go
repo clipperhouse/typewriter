@@ -54,6 +54,13 @@ type parseTest struct {
 
 func TestParse(t *testing.T) {
 	tests := []parseTest{
+		{`// +test foo`, false, TagSlice{
+			{"foo", []TagValue{}, false},
+		}, true},
+		{`// +test foo bar`, false, TagSlice{
+			{"foo", []TagValue{}, false},
+			{"bar", []TagValue{}, false},
+		}, true},
 		{`// +test foo:"bar,Baz"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil},
@@ -136,7 +143,6 @@ func TestParse(t *testing.T) {
 		{`// +test foo:"bar,Baz-"`, false, nil, false},
 		{`// +test foo:bar,Baz" qux:"stuff"`, false, nil, false},
 		{`// +test foo"bar,Baz" qux:"stuff"`, false, nil, false},
-		{`// +test foo:"bar,Baz" junk qux:"stuff"`, false, nil, false},
 		{`// +test foo:"bar,Baz" 8qux:"stuff"`, false, nil, false},
 		{`// +test fo^o:"bar,Baz" qux:"stuff"`, false, nil, false},
 		{`// +test foo:"bar,Ba|z" qux:"stuff"`, false, nil, false},

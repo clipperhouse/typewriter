@@ -217,15 +217,6 @@ Loop:
 				Name: item.val,
 			}
 
-			// expect colonquote
-			if p.next().typ != itemColonQuote {
-				err := &SyntaxError{
-					msg: fmt.Sprintf(`tag '%s' must be followed by ':"'`, item.val),
-					Pos: item.pos,
-				}
-				return false, nil, err
-			}
-
 			// check for duplicate
 			if _, seen := exists[tag.Name]; seen {
 				err := &SyntaxError{
@@ -238,14 +229,19 @@ Loop:
 			// mark tag as previously seen
 			exists[tag.Name] = struct{}{}
 
-			negated, vals, err := parseTagValues(p)
+			// tag has values
+			if p.peek().typ == itemColonQuote {
+				p.next() // absorb the colonQuote
+				negated, vals, err := parseTagValues(p)
 
-			if err != nil {
-				return false, nil, err
+				if err != nil {
+					return false, nil, err
+				}
+
+				tag.Negated = negated
+				tag.Values = vals
+
 			}
-
-			tag.Negated = negated
-			tag.Values = vals
 
 			tags = append(tags, tag)
 		default:
