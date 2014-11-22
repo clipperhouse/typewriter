@@ -2,6 +2,7 @@ package typewriter
 
 import (
 	"fmt"
+	"strings"
 
 	"text/template"
 )
@@ -45,11 +46,11 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 func (ts TemplateSlice) ByTag(t Type, tag Tag) (*template.Template, error) {
 	// templates which might work
 	candidates := ts.Where(func(tmpl *Template) bool {
-		return tmpl.Name == tag.Name
+		return strings.EqualFold(tmpl.Name, tag.Name)
 	})
 
 	if len(candidates) == 0 {
-		err := fmt.Errorf("%s is unknown", tag.Name)
+		err := fmt.Errorf("could not find template for %q", tag.Name)
 		return nil, err
 	}
 
@@ -71,7 +72,7 @@ func (ts TemplateSlice) ByTagValue(t Type, v TagValue) (*template.Template, erro
 
 	// templates which might work
 	candidates := ts.Where(func(tmpl *Template) bool {
-		return tmpl.Name == v.Name
+		return strings.EqualFold(tmpl.Name, v.Name)
 	})
 
 	if len(candidates) == 0 {
