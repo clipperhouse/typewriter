@@ -15,6 +15,11 @@ type Template struct {
 	TypeParameterConstraints []Constraint
 }
 
+// Parse parses (converts) a typewriter.Template to a *template.Template
+func (tmpl *Template) Parse() (*template.Template, error) {
+	return template.New(tmpl.Name).Parse(tmpl.Text)
+}
+
 // TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.TryType(t); err != nil {
@@ -52,7 +57,7 @@ func (ts TemplateSlice) ByTag(t Type, tag Tag) (*template.Template, error) {
 	for _, tmpl := range candidates {
 		if err := tmpl.TypeConstraint.TryType(t); err == nil {
 			// eagerly return on success
-			return template.New(tag.String()).Parse(tmpl.Text)
+			return tmpl.Parse()
 		}
 	}
 
@@ -78,7 +83,7 @@ func (ts TemplateSlice) ByTagValue(t Type, v TagValue) (*template.Template, erro
 	for _, tmpl := range candidates {
 		if err := tmpl.TryTypeAndValue(t, v); err == nil {
 			// eagerly return on success
-			return template.New(v.String()).Parse(tmpl.Text)
+			return tmpl.Parse()
 		}
 	}
 
