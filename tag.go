@@ -9,6 +9,10 @@ type Tag struct {
 	Negated bool
 }
 
+func (t Tag) String() string {
+	return t.Name
+}
+
 type TagValue struct {
 	Name           string
 	TypeParameters []Type
