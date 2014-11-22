@@ -44,6 +44,7 @@ func TestNewApp(t *testing.T) {
 
 	if err1 != nil {
 		t.Error(err1)
+		return
 	}
 
 	p1 := a1.Packages[0]
@@ -71,6 +72,7 @@ func TestNewAppFiltered(t *testing.T) {
 
 	if err1 != nil {
 		t.Error(err1)
+		return
 	}
 
 	p1 := a1.Packages[0]
@@ -144,6 +146,7 @@ func TestWriteAll(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	p1 := a1.Packages[0]

@@ -220,6 +220,7 @@ func TestGetTypes(t *testing.T) {
 
 	if err != nil {
 		t.Error(err)
+		return
 	}
 
 	typs := pkgs[0].Types
