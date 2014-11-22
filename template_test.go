@@ -145,7 +145,7 @@ func TestTryTypeAndValue(t *testing.T) {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestByTagValue(t *testing.T) {
 	// template exists, no constraints
 	slice1 := TemplateSlice{
 		{
@@ -166,7 +166,7 @@ func TestGet(t *testing.T) {
 		Name: "TestValue",
 	}
 
-	_, err1 := slice1.Get(typ1, v1)
+	_, err1 := slice1.ByTagValue(typ1, v1)
 
 	if err1 != nil {
 		t.Error(err1)
@@ -192,7 +192,7 @@ func TestGet(t *testing.T) {
 		Name: "TestValue",
 	}
 
-	_, err2 := slice2.Get(typ2, v2)
+	_, err2 := slice2.ByTagValue(typ2, v2)
 
 	if err2 == nil {
 		t.Error("should return an error for not found")
@@ -221,7 +221,7 @@ func TestGet(t *testing.T) {
 		Name: "TestValue",
 	}
 
-	_, err3 := slice3.Get(typ3, v3)
+	_, err3 := slice3.ByTagValue(typ3, v3)
 
 	if err3 == nil {
 		t.Error("should return an error for not found")
@@ -260,7 +260,7 @@ func TestGet(t *testing.T) {
 		},
 	}
 
-	tmpl4, err4 := slice4.Get(typ4, v4)
+	tmpl4, err4 := slice4.ByTagValue(typ4, v4)
 
 	if err4 != nil {
 		t.Error(err4)

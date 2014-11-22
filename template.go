@@ -36,8 +36,8 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	return nil
 }
 
-// Get attempts to locate a template which meets type constraints, and parses it.
-func (ts TemplateSlice) Get(t Type, v TagValue) (*template.Template, error) {
+// ByTagValue attempts to locate a template which meets type constraints, and parses it.
+func (ts TemplateSlice) ByTagValue(t Type, v TagValue) (*template.Template, error) {
 	// a bit of poor-man's type resolution here
 
 	// templates which might work
