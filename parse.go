@@ -167,6 +167,9 @@ func parse(input, directive string, evaluator evaluator) (Pointer, TagSlice, err
 		evaluator: evaluator,
 	}
 
+	// to ensure no duplicate tags
+	exists := make(map[string]struct{})
+
 Loop:
 	for {
 		item := p.next()
@@ -222,6 +225,18 @@ Loop:
 				}
 				return false, nil, err
 			}
+
+			// check for duplicate
+			if _, seen := exists[tag.Name]; seen {
+				err := &SyntaxError{
+					msg: fmt.Sprintf("duplicate tag %q", tag.Name),
+					Pos: item.pos,
+				}
+				return pointer, nil, err
+			}
+
+			// mark tag as previously seen
+			exists[tag.Name] = struct{}{}
 
 			negated, vals, err := parseTagValues(p)
 

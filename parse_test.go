@@ -147,6 +147,7 @@ func TestParse(t *testing.T) {
 		{`// +test foo:"bar,Baz[foo"`, false, nil, false},
 		{`// +test foo:"bar,Baz[foo]]"`, false, nil, false},
 		{`// +test foo:"bar,Baz[[]foo"`, false, nil, false},
+		{`// +test foof:"bar,Baz" foof:"qux"`, false, nil, false},
 	}
 
 	for i, test := range tests {
