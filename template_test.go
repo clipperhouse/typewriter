@@ -145,6 +145,129 @@ func TestTryTypeAndValue(t *testing.T) {
 	}
 }
 
+func TestByTag(t *testing.T) {
+	// template exists, no constraints
+	slice1 := TemplateSlice{
+		{
+			Name: "TestTag",
+			Text: "This should compile.",
+		},
+		{
+			Name: "SomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ1 := Type{
+		Name: "TestType",
+	}
+
+	tag1 := Tag{
+		Name: "TestTag",
+	}
+
+	_, err1 := slice1.ByTag(typ1, tag1)
+
+	if err1 != nil {
+		t.Error(err1)
+	}
+
+	// template doesn't exist
+	slice2 := TemplateSlice{
+		{
+			Name: "SomethingElse",
+			Text: "This should compile.",
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ2 := Type{
+		Name: "TestType",
+	}
+
+	tag2 := Tag{
+		Name: "TestTag",
+	}
+
+	_, err2 := slice2.ByTag(typ2, tag2)
+
+	if err2 == nil {
+		t.Error("should return an error for not found")
+	}
+
+	// template name exists but type constraint is wrong
+	slice3 := TemplateSlice{
+		{
+			Name:           "TestTag",
+			Text:           "This should compile.",
+			TypeConstraint: Constraint{Numeric: true},
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ3 := Type{
+		Name:    "TestType",
+		ordered: true,
+	}
+
+	tag3 := Tag{
+		Name: "TestTag",
+	}
+
+	_, err3 := slice3.ByTag(typ3, tag3)
+
+	if err3 == nil {
+		t.Error("should return an error for type constraint")
+	}
+
+	// multiple exist, only one matches type constraint
+	slice4 := TemplateSlice{
+		{
+			Name:           "TestTag",
+			Text:           "This should compile.",
+			TypeConstraint: Constraint{Numeric: true},
+		},
+		{
+			Name: "AnotherSomethingElse",
+			Text: "This should compile.",
+		},
+		{
+			Name:           "TestTag",
+			Text:           "This should be found.",
+			TypeConstraint: Constraint{Ordered: true},
+		},
+	}
+
+	typ4 := Type{
+		Name:    "TestType",
+		ordered: true,
+	}
+
+	tag4 := Tag{
+		Name: "TestTag",
+	}
+
+	tmpl4, err4 := slice4.ByTag(typ4, tag4)
+
+	if err4 != nil {
+		t.Error(err4)
+	}
+
+	// ensure that we got the right template
+	var b bytes.Buffer
+	tmpl4.Execute(&b, nil)
+
+	if b.String() != slice4[2].Text { // "This should be found."
+		t.Error("should have picked the template which matches type constraints")
+	}
+}
+
 func TestByTagValue(t *testing.T) {
 	// template exists, no constraints
 	slice1 := TemplateSlice{

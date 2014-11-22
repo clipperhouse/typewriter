@@ -36,6 +36,30 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	return nil
 }
 
+// ByTag attempts to locate a template which meets type constraints, and parses it.
+func (ts TemplateSlice) ByTag(t Type, tag Tag) (*template.Template, error) {
+	// templates which might work
+	candidates := ts.Where(func(tmpl *Template) bool {
+		return tmpl.Name == tag.Name
+	})
+
+	if len(candidates) == 0 {
+		err := fmt.Errorf("%s is unknown", tag.Name)
+		return nil, err
+	}
+
+	// try to find one that meets type constraints
+	for _, tmpl := range candidates {
+		if err := tmpl.TypeConstraint.TryType(t); err == nil {
+			// eagerly return on success
+			return template.New(tag.String()).Parse(tmpl.Text)
+		}
+	}
+
+	// send back the first error message; not great but OK most of the time
+	return nil, candidates[0].TypeConstraint.TryType(t)
+}
+
 // ByTagValue attempts to locate a template which meets type constraints, and parses it.
 func (ts TemplateSlice) ByTagValue(t Type, v TagValue) (*template.Template, error) {
 	// a bit of poor-man's type resolution here
