@@ -2,8 +2,6 @@
 // TypeWriter: slice
 // Directive: +gen on *Template
 
-// See http://clipperhouse.github.io/gen for documentation
-
 package typewriter
 
 // TemplateSlice is a slice of type *Template. Use it where you would use []*Template.

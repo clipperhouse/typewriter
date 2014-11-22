@@ -45,6 +45,15 @@ func (t Type) LongName() string {
 	return strings.Join(parts, "")
 }
 
+func (t Type) FindTag(name string) (Tag, bool) {
+	for _, tag := range t.Tags {
+		if tag.Name == name {
+			return tag, true
+		}
+	}
+	return Tag{}, false
+}
+
 // Pointer exists as a type to allow simple use as bool or as String, which returns *
 type Pointer bool
 
