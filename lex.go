@@ -159,8 +159,8 @@ func lexTag(l *lexer) stateFn {
 			l.backup()
 			return lexIdentifier(l, itemTag)
 		case r == ':':
-			if l.next() != '"' {
-				return l.errorf(`expected :" following tag name`)
+			if n := l.next(); n != '"' {
+				return l.errorf(`expected " following :, got %q`, n)
 			}
 			l.emit(itemColonQuote)
 			return lexTagValues
