@@ -9,8 +9,8 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
     	“github.com/clipperhouse/typewriter”
     	
     	// any number of typewriters 
-    	_ “github.com/clipperhouse/containerwriter”
-    	_ “github.com/clipperhouse/typewriters/genwriter”
+    	_ “github.com/clipperhouse/setwriter”
+    	_ “github.com/clipperhouse/linkedlistwriter”
     )
     
     func main() {
