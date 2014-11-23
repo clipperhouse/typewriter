@@ -9,10 +9,23 @@ import (
 	"strings"
 )
 
+// unlike the go build tool, the parser does not ignore . and _ files
+var ignored = func(f os.FileInfo) bool {
+	return !strings.HasPrefix(f.Name(), "_") && !strings.HasPrefix(f.Name(), ".")
+}
+
 func getPackages(directive string, filter func(os.FileInfo) bool) ([]*Package, error) {
+	// wrap filter with default filter
+	filt := func(f os.FileInfo) bool {
+		if filter != nil {
+			return ignored(f) && filter(f)
+		}
+		return ignored(f)
+	}
+
 	// get the AST
 	fset := token.NewFileSet()
-	astPkgs, err := parser.ParseDir(fset, "./", filter, parser.ParseComments)
+	astPkgs, err := parser.ParseDir(fset, "./", filt, parser.ParseComments)
 
 	if err != nil {
 		return nil, err
