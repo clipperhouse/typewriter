@@ -56,7 +56,7 @@ var typeWriters []TypeWriter
 // Your program will do something like:
 //	import (
 //		"github.com/clipperhouse/typewriter"
-//		_ "github.com/clipperhouse/slicewriter"
+//		_ "github.com/clipperhouse/slice"
 //	)
 func Register(tw TypeWriter) error {
 	for _, v := range typeWriters {
