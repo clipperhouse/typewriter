@@ -10,7 +10,7 @@ Usage is analogous to how codecs work with Go’s [image](http://golang.org/pkg/
     	
     	// any number of typewriters 
     	_ “github.com/clipperhouse/set”
-    	_ “github.com/clipperhouse/linkedlistwriter”
+    	_ “github.com/clipperhouse/linkedlist”
     )
     
     func main() {
