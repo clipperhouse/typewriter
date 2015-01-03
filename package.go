@@ -45,17 +45,17 @@ func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
 func (p *Package) Eval(name string) (Type, error) {
 	var result Type
 
-	t, _, err := types.Eval(name, p.Package, p.Scope())
+	t, err := types.Eval(name, p.Package, p.Scope())
 	if err != nil {
 		return result, err
 	}
 
 	result = Type{
-		Pointer:    isPointer(t),
+		Pointer:    isPointer(t.Type),
 		Name:       strings.TrimLeft(name, Pointer(true).String()), // trims the * if it exists
-		comparable: isComparable(t),
-		numeric:    isNumeric(t),
-		ordered:    isOrdered(t),
+		comparable: isComparable(t.Type),
+		numeric:    isNumeric(t.Type),
+		ordered:    isOrdered(t.Type),
 	}
 
 	return result, nil
