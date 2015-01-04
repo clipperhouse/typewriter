@@ -22,7 +22,7 @@ import (
 type App struct {
 	// All typewriter.Package found in the current directory.
 	Packages []*Package
-	// All typewriter.TypeWriters registered on init.
+	// All typewriter.Interface's registered on init.
 	TypeWriters []Interface
 	Directive   string
 }
