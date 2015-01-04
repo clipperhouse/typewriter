@@ -21,6 +21,7 @@ type item struct {
 }
 
 // itemType identifies the type of lex items.
+// +gen stringer
 type itemType int
 
 const (
