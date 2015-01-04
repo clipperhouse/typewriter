@@ -9,8 +9,8 @@ import (
 	"io"
 )
 
-// TypeWriter is the interface to be implemented for code generation via gen
-type TypeWriter interface {
+// Interface is the interface to be implemented for code generation via gen
+type Interface interface {
 	Name() string
 	// Imports is a slice of imports required for the type; each will be written into the imports declaration.
 	Imports(t Type) []ImportSpec

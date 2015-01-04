@@ -45,7 +45,7 @@ func (t Type) LongName() string {
 	return strings.Join(parts, "")
 }
 
-func (t Type) FindTag(tw TypeWriter) (Tag, bool) {
+func (t Type) FindTag(tw Interface) (Tag, bool) {
 	for _, tag := range t.Tags {
 		if tag.Name == tw.Name() {
 			return tag, true

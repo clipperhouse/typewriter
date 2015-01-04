@@ -31,7 +31,7 @@ func TestRegister(t *testing.T) {
 	}
 
 	// clear 'em out for later tests
-	typeWriters = make([]TypeWriter, 0)
+	typeWriters = make([]Interface, 0)
 }
 
 func TestNewApp(t *testing.T) {
@@ -60,7 +60,7 @@ func TestNewApp(t *testing.T) {
 	}
 
 	// clear 'em out for later tests
-	typeWriters = make([]TypeWriter, 0)
+	typeWriters = make([]Interface, 0)
 }
 
 func TestNewAppFiltered(t *testing.T) {
@@ -163,7 +163,7 @@ func TestWriteAll(t *testing.T) {
 	}
 
 	// clear 'em out
-	typeWriters = make([]TypeWriter, 0)
+	typeWriters = make([]Interface, 0)
 
 	// new set of writers for this test
 
@@ -197,7 +197,7 @@ func TestWriteAll(t *testing.T) {
 	}
 
 	// clear 'em out
-	typeWriters = make([]TypeWriter, 0)
+	typeWriters = make([]Interface, 0)
 
 	// new set of writers for this test
 
@@ -219,7 +219,7 @@ func TestWriteAll(t *testing.T) {
 	}
 
 	// clear 'em out for later tests
-	typeWriters = make([]TypeWriter, 0)
+	typeWriters = make([]Interface, 0)
 }
 
 type fooWriter struct {
