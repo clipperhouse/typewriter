@@ -360,5 +360,5 @@ type SyntaxError struct {
 }
 
 func (e *SyntaxError) Error() string {
-	return e.msg
+	return strings.TrimLeft(e.msg, ":- ") // some errors try to add empty Pos()
 }
