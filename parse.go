@@ -48,21 +48,18 @@ func getPackages(directive string, filter func(os.FileInfo) bool) ([]*Package, e
 			pointer, tags, err := parse(c.Text, directive, pkg)
 
 			if err != nil {
-				if serr, ok := err.(*SyntaxError); ok {
-					// error should have Pos relative to the whole AST
-					serr.Pos += c.Slash
-					// Go-style syntax error with filename, line number, column
-					serr.msg = fset.Position(serr.Pos).String() + ": " + serr.msg
-				}
+				// error should have Pos relative to the whole AST
+				err.Pos += c.Slash
+				// Go-style syntax error with filename, line number, column
+				err.msg = fset.Position(err.Pos).String() + ": " + err.Error()
 				return nil, err
 			}
 
-			typ, err := pkg.Eval(pointer.String() + s.Name.Name)
+			typ, terr := pkg.Eval(pointer.String() + s.Name.Name)
 
-			if err != nil {
+			if terr != nil {
 				// really shouldn't happen, since the type came from the ast in the first place
-				err = fmt.Errorf("failed to evaluate type %s (%s)", typ.Name, err)
-				return nil, err
+				return nil, terr
 			}
 
 			typ.Tags = tags
@@ -172,7 +169,7 @@ func (p *parsr) peek() item {
 	return p.token[0]
 }
 
-func parse(input, directive string, evaluator evaluator) (Pointer, TagSlice, error) {
+func parse(input, directive string, evaluator evaluator) (Pointer, TagSlice, *SyntaxError) {
 	var pointer Pointer
 	var tags TagSlice
 	p := &parsr{
@@ -265,7 +262,7 @@ Loop:
 	return pointer, tags, nil
 }
 
-func parseTagValues(p *parsr) (bool, []TagValue, error) {
+func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 	var negated bool
 	var vals []TagValue
 
@@ -303,11 +300,7 @@ func parseTagValues(p *parsr) (bool, []TagValue, error) {
 			if p.peek().typ == itemTypeParameter {
 				typs, err := parseTypeParameters(p)
 				if err != nil {
-					serr := &SyntaxError{
-						msg: err.Error(),
-						Pos: item.pos,
-					}
-					return false, nil, serr
+					return false, nil, err
 				}
 				val.TypeParameters = typs
 			}
@@ -322,7 +315,7 @@ func parseTagValues(p *parsr) (bool, []TagValue, error) {
 	}
 }
 
-func parseTypeParameters(p *parsr) ([]Type, error) {
+func parseTypeParameters(p *parsr) ([]Type, *SyntaxError) {
 	var typs []Type
 
 	for {
@@ -347,7 +340,7 @@ func parseTypeParameters(p *parsr) ([]Type, error) {
 	}
 }
 
-func unexpected(item item) error {
+func unexpected(item item) *SyntaxError {
 	return &SyntaxError{
 		msg: fmt.Sprintf("unexpected '%v'", item.val),
 		Pos: item.pos,
