@@ -187,10 +187,7 @@ Loop:
 		case itemEOF:
 			break Loop
 		case itemError:
-			err := &SyntaxError{
-				msg: item.val,
-				Pos: item.pos,
-			}
+			err := NewSyntaxError(item, item.val)
 			return false, nil, err
 		case itemCommentPrefix:
 			// don't care, move on
@@ -204,19 +201,13 @@ Loop:
 		case itemPointer:
 			// have we already seen a pointer?
 			if pointer {
-				err := &SyntaxError{
-					msg: fmt.Sprintf("second pointer declaration"),
-					Pos: item.pos,
-				}
+				err := NewSyntaxError(item, "second pointer declaration")
 				return false, nil, err
 			}
 
 			// have we already seen tags? pointer must be first
 			if len(tags) > 0 {
-				err := &SyntaxError{
-					msg: fmt.Sprintf("pointer declaration must precede tags"),
-					Pos: item.pos,
-				}
+				err := NewSyntaxError(item, "pointer declaration must precede tags")
 				return false, nil, err
 			}
 
@@ -229,10 +220,7 @@ Loop:
 
 			// check for duplicate
 			if _, seen := exists[tag.Name]; seen {
-				err := &SyntaxError{
-					msg: fmt.Sprintf("duplicate tag %q", tag.Name),
-					Pos: item.pos,
-				}
+				err := NewSyntaxError(item, "duplicate tag %q", tag.Name)
 				return pointer, nil, err
 			}
 
@@ -271,24 +259,15 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 
 		switch item.typ {
 		case itemError:
-			err := &SyntaxError{
-				msg: item.val,
-				Pos: item.pos,
-			}
+			err := NewSyntaxError(item, item.val)
 			return false, nil, err
 		case itemEOF:
 			// shouldn't happen within a tag
-			err := &SyntaxError{
-				msg: "expected a close quote",
-				Pos: item.pos,
-			}
+			err := NewSyntaxError(item, "expected a close quote")
 			return false, nil, err
 		case itemMinus:
 			if len(vals) > 0 {
-				err := &SyntaxError{
-					msg: fmt.Sprintf("negation must precede tag values"),
-					Pos: item.pos,
-				}
+				err := NewSyntaxError(item, "negation must precede tag values")
 				return false, nil, err
 			}
 			negated = true
@@ -325,11 +304,8 @@ func parseTypeParameters(p *parsr) ([]Type, *SyntaxError) {
 		case itemTypeParameter:
 			typ, err := p.evaluator.Eval(item.val)
 			if err != nil {
-				serr := &SyntaxError{
-					msg: err.Error(),
-					Pos: item.pos,
-				}
-				return nil, serr
+				err := NewSyntaxError(item, err.Error())
+				return nil, err
 			}
 
 			typs = append(typs, typ)
@@ -341,10 +317,7 @@ func parseTypeParameters(p *parsr) ([]Type, *SyntaxError) {
 }
 
 func unexpected(item item) *SyntaxError {
-	return &SyntaxError{
-		msg: fmt.Sprintf("unexpected '%v'", item.val),
-		Pos: item.pos,
-	}
+	return NewSyntaxError(item, "unexpected '%v'", item.val)
 }
 
 type SyntaxError struct {
@@ -354,4 +327,11 @@ type SyntaxError struct {
 
 func (e *SyntaxError) Error() string {
 	return strings.TrimLeft(e.msg, ":- ") // some errors try to add empty Pos()
+}
+
+func NewSyntaxError(item item, format string, a ...interface{}) *SyntaxError {
+	return &SyntaxError{
+		msg: fmt.Sprintf(format, a),
+		Pos: item.pos,
+	}
 }
