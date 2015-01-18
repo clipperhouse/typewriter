@@ -330,8 +330,14 @@ func (e *SyntaxError) Error() string {
 }
 
 func NewSyntaxError(item item, format string, a ...interface{}) *SyntaxError {
+	var msg string
+	if len(a) > 0 {
+		msg = fmt.Sprintf(format, a)
+	} else {
+		msg = format
+	}
 	return &SyntaxError{
-		msg: fmt.Sprintf(format, a),
+		msg: msg,
 		Pos: item.pos,
 	}
 }
