@@ -1,6 +1,7 @@
 package typewriter
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -33,11 +34,15 @@ func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
 		files = append(files, f)
 	}
 
-	typesPkg, err := types.Check(a.Name, fset, files)
-
-	if err != nil {
-		return nil, err
+	cfg := &types.Config{
+		IgnoreFuncBodies: true,
+		Error: func(err error){ fmt.Println("gen: "+err.Error()) },
 	}
+
+	// TODO: Is there a way to distinguish between errors we care
+	// about and errors for undefined types that gen hasn't generated
+	// yet?
+	typesPkg, _ := cfg.Check(a.Name, fset, files, nil)
 
 	return &Package{typesPkg, []Type{}}, nil
 }
