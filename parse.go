@@ -14,11 +14,11 @@ var ignored = func(f os.FileInfo) bool {
 	return !strings.HasPrefix(f.Name(), "_") && !strings.HasPrefix(f.Name(), ".")
 }
 
-func getPackages(directive string, filter func(os.FileInfo) bool) ([]*Package, error) {
+func getPackages(directive string, conf *Config) ([]*Package, error) {
 	// wrap filter with default filter
 	filt := func(f os.FileInfo) bool {
-		if filter != nil {
-			return ignored(f) && filter(f)
+		if conf.Filter != nil {
+			return ignored(f) && conf.Filter(f)
 		}
 		return ignored(f)
 	}
@@ -34,7 +34,7 @@ func getPackages(directive string, filter func(os.FileInfo) bool) ([]*Package, e
 	var pkgs []*Package
 
 	for _, a := range astPkgs {
-		pkg, err := getPackage(fset, a)
+		pkg, err := getPackage(fset, a, conf)
 
 		if err != nil {
 			return nil, err

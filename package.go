@@ -26,7 +26,7 @@ func NewPackage(path, name string) *Package {
 	}
 }
 
-func getPackage(fset *token.FileSet, a *ast.Package) (*Package, error) {
+func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, error) {
 	// pull map into a slice
 	var files []*ast.File
 	for _, f := range a.Files {

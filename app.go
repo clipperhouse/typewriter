@@ -29,16 +29,15 @@ type App struct {
 
 // NewApp parses the current directory, enumerating registered TypeWriters and collecting Types and their related information.
 func NewApp(directive string) (*App, error) {
-	return NewAppFiltered(directive, nil)
+	return DefaultConfig.NewApp(directive)
 }
 
-// NewAppFiltered parses the current directory, collecting Types and their related information. Pass a filter to limit which files are operated on.
-func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*App, error) {
+func (conf *Config) NewApp(directive string) (*App, error) {
 	a := &App{
 		Directive: directive,
 	}
 
-	pkgs, err := getPackages(directive, filter)
+	pkgs, err := getPackages(directive, conf)
 	if err != nil {
 		return a, err
 	}
@@ -46,6 +45,14 @@ func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*App, erro
 	a.Packages = pkgs
 	a.TypeWriters = typeWriters
 	return a, nil
+}
+
+// NewAppFiltered parses the current directory, collecting Types and their related information. Pass a filter to limit which files are operated on.
+func NewAppFiltered(directive string, filter func(os.FileInfo) bool) (*App, error) {
+	conf := &Config{
+		Filter: filter,
+	}
+	return conf.NewApp(directive)
 }
 
 // Individual TypeWriters register on init, keyed by name
