@@ -37,7 +37,12 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		pkg, err := getPackage(fset, a, conf)
 
 		if err != nil {
-			return nil, err
+			_, isTypeCheckError := err.(*TypeCheckError)
+
+			if !(conf.IgnoreTypeCheckErrors && isTypeCheckError) {
+				// bail unless ignoring type check errors
+				return nil, err
+			}
 		}
 
 		pkgs = append(pkgs, pkg)

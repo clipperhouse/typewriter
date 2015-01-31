@@ -26,6 +26,14 @@ func NewPackage(path, name string) *Package {
 	}
 }
 
+type TypeCheckError struct {
+	err error
+}
+
+func (t *TypeCheckError) Error() string {
+	return t.err.Error()
+}
+
 func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, error) {
 	// pull map into a slice
 	var files []*ast.File
@@ -33,13 +41,24 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, er
 		files = append(files, f)
 	}
 
-	typesPkg, err := types.Check(a.Name, fset, files)
+	config := types.Config{}
 
-	if err != nil {
-		return nil, err
+	if conf.IgnoreTypeCheckErrors {
+		// no-op allows type checking to proceed in presence of errors
+		// https://godoc.org/golang.org/x/tools/go/types#Config
+		config.Error = func(err error) {}
 	}
 
-	return &Package{typesPkg, []Type{}}, nil
+	typesPkg, err := config.Check(a.Name, fset, files, nil)
+
+	p := &Package{typesPkg, []Type{}}
+
+	// type-check error is the only error this func can return
+	if err != nil {
+		return p, &TypeCheckError{err}
+	}
+
+	return p, nil
 }
 
 func (p *Package) Eval(name string) (Type, error) {
