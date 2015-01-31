@@ -41,7 +41,10 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, er
 		files = append(files, f)
 	}
 
-	config := types.Config{}
+	config := types.Config{
+		DisableUnusedImportCheck: true,
+		IgnoreFuncBodies:         true,
+	}
 
 	if conf.IgnoreTypeCheckErrors {
 		// no-op allows type checking to proceed in presence of errors
