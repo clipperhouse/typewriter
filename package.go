@@ -34,7 +34,7 @@ func (t *TypeCheckError) Error() string {
 	return t.err.Error()
 }
 
-func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, error) {
+func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *TypeCheckError) {
 	// pull map into a slice
 	var files []*ast.File
 	for _, f := range a.Files {

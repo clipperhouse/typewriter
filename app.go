@@ -34,17 +34,14 @@ func NewApp(directive string) (*App, error) {
 
 func (conf *Config) NewApp(directive string) (*App, error) {
 	a := &App{
-		Directive: directive,
+		Directive:   directive,
+		TypeWriters: typeWriters,
 	}
 
 	pkgs, err := getPackages(directive, conf)
-	if err != nil {
-		return a, err
-	}
 
 	a.Packages = pkgs
-	a.TypeWriters = typeWriters
-	return a, nil
+	return a, err
 }
 
 // NewAppFiltered parses the current directory, collecting Types and their related information. Pass a filter to limit which files are operated on.

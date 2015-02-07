@@ -32,16 +32,22 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 	}
 
 	var pkgs []*Package
+	var typeCheckError *TypeCheckError
 
 	for _, a := range astPkgs {
 		pkg, err := getPackage(fset, a, conf)
 
 		if err != nil {
-			_, isTypeCheckError := err.(*TypeCheckError)
-
-			if !(conf.IgnoreTypeCheckErrors && isTypeCheckError) {
-				// bail unless ignoring type check errors
+			// under normal circumstances, err means bail
+			// however, if caller chooses to ignore TypeCheckErrors, continue
+			// (getPackage returns only TypeCheckErrors)
+			if !conf.IgnoreTypeCheckErrors {
 				return nil, err
+			}
+
+			// store the first error for return at bottom
+			if typeCheckError == nil {
+				typeCheckError = err
 			}
 		}
 
@@ -72,6 +78,10 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 
 			pkg.Types = append(pkg.Types, typ)
 		}
+	}
+
+	if typeCheckError != nil {
+		return pkgs, typeCheckError
 	}
 
 	return pkgs, nil
