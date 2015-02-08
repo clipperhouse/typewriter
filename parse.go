@@ -56,7 +56,7 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		specs := getTaggedComments(a, directive)
 
 		for s, c := range specs {
-			pointer, tags, err := parse(c.Text, directive, pkg)
+			pointer, tags, err := parse(c.Text, directive)
 
 			if err != nil {
 				// error should have Pos relative to the whole AST
@@ -66,14 +66,39 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 				return nil, err
 			}
 
-			typ, terr := pkg.Eval(pointer.String() + s.Name.Name)
+			typ, evalErr := pkg.Eval(pointer.String() + s.Name.Name)
 
-			if terr != nil {
-				// really shouldn't happen, since the type came from the ast in the first place
-				return nil, terr
+			if evalErr != nil {
+				// possibly attributable to type check error
+				if typeCheckError != nil {
+					// combine messages
+					combinedErr := fmt.Errorf("%s\n%s", typeCheckError, evalErr)
+					return pkgs, combinedErr
+				}
+				return pkgs, evalErr
 			}
 
-			typ.Tags = tags
+			// do type evaluation on type parameters
+			for _, tag := range tags {
+				for i, val := range tag.Values {
+					for _, name := range val.typeParameterNames {
+						tp, evalErr := pkg.Eval(name)
+						if evalErr != nil {
+							// possibly attributable to type check error
+							if typeCheckError != nil {
+								// combine messages
+								combinedErr := fmt.Errorf("%s\n%s", typeCheckError, evalErr)
+								return pkgs, combinedErr
+							}
+							return pkgs, evalErr
+						}
+						val.TypeParameters = append(val.TypeParameters, tp)
+					}
+					tag.Values[i] = val // mutate the original
+				}
+				typ.Tags = append(typ.Tags, tag)
+			}
+
 			typ.test = test(strings.HasSuffix(fset.Position(s.Pos()).Filename, "_test.go"))
 
 			pkg.Types = append(pkg.Types, typ)
@@ -156,7 +181,6 @@ type parsr struct {
 	lex       *lexer
 	token     [2]item // two-token lookahead for parser.
 	peekCount int
-	evaluator evaluator
 }
 
 // next returns the next token.
@@ -184,12 +208,11 @@ func (p *parsr) peek() item {
 	return p.token[0]
 }
 
-func parse(input, directive string, evaluator evaluator) (Pointer, TagSlice, *SyntaxError) {
+func parse(input, directive string) (Pointer, TagSlice, *SyntaxError) {
 	var pointer Pointer
 	var tags TagSlice
 	p := &parsr{
-		lex:       lex(input),
-		evaluator: evaluator,
+		lex: lex(input),
 	}
 
 	// to ensure no duplicate tags
@@ -296,7 +319,7 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 				if err != nil {
 					return false, nil, err
 				}
-				val.TypeParameters = typs
+				val.typeParameterNames = typs
 			}
 
 			vals = append(vals, val)
@@ -309,21 +332,15 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 	}
 }
 
-func parseTypeParameters(p *parsr) ([]Type, *SyntaxError) {
-	var typs []Type
+func parseTypeParameters(p *parsr) ([]string, *SyntaxError) {
+	var typs []string
 
 	for {
 		item := p.next()
 
 		switch item.typ {
 		case itemTypeParameter:
-			typ, err := p.evaluator.Eval(item.val)
-			if err != nil {
-				err := NewSyntaxError(item, err.Error())
-				return nil, err
-			}
-
-			typs = append(typs, typ)
+			typs = append(typs, item.val)
 		default:
 			p.backup()
 			return typs, nil

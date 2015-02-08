@@ -1,6 +1,7 @@
 package typewriter
 
 import (
+	"fmt"
 	"go/ast"
 	"os"
 	"strings"
@@ -63,79 +64,66 @@ func TestParse(t *testing.T) {
 		}, true},
 		{`// +test foo:"bar,Baz"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, nil},
 			}, false},
 		}, true},
 		{`// +test * foo:"bar,Baz"`, true, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz" qux:"stuff"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, nil},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", nil},
+				{"stuff", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"-bar,Baz"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, nil},
 			}, true},
 		}, true},
 		{`// +test foo:"bar  ,Baz "  `, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[qaz], qux"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", []Type{
-					Type{Name: "qaz"},
-				}},
-				{"qux", nil},
+				{"bar", nil, nil},
+				{"Baz", nil, []string{"qaz"}},
+				{"qux", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[[]qaz]"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", []Type{
-					Type{Name: "[]qaz"},
-				}},
+				{"bar", nil, nil},
+				{"Baz", nil, []string{"[]qaz"}},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"bar", nil},
-				{"Baz", []Type{
-					Type{Name: "qaz"},
-					Type{Name: "hey"},
-				}},
+				{"bar", nil, nil},
+				{"Baz", nil, []string{"qaz", "hey"}},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", nil},
+				{"stuff", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"Baz", []Type{
-					Type{Name: "qaz"},
-				}},
-				{"yo", []Type{
-					Type{Name: "dude"},
-				}},
+				{"Baz", nil, []string{"qaz"}},
+				{"yo", nil, []string{"dude"}},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", []Type{
-					Type{Name: "things"},
-				}},
+				{"stuff", nil, []string{"things"}},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz`, false, nil, false},
@@ -160,7 +148,7 @@ func TestParse(t *testing.T) {
 		c := &ast.Comment{
 			Text: test.comment,
 		}
-		pointer, tags, err := parse(c.Text, "+test", eval{})
+		pointer, tags, err := parse(c.Text, "+test")
 
 		if test.valid != (err == nil) {
 			t.Errorf("[test %v] valid should have been %v for: %s\n%s", i, test.valid, test.comment, err)
@@ -171,7 +159,7 @@ func TestParse(t *testing.T) {
 		}
 
 		if !tagsEqual(tags, test.tags) {
-			t.Errorf("[test %v] tags should have been %v, got %v", i, test.tags, tags)
+			t.Fatalf("[test %v] tags should have been \n%v, got \n%v", i, test.tags, tags)
 		}
 	}
 }
@@ -222,7 +210,7 @@ func tagsEqual(tags, other TagSlice) bool {
 
 func TestGetTypes(t *testing.T) {
 	// app and dummy types are marked up with +test
-	pkgs, err := getPackages("+test", nil)
+	pkgs, err := getPackages("+test", DefaultConfig)
 
 	if err != nil {
 		t.Error(err)
@@ -273,10 +261,11 @@ func TestGetTypes(t *testing.T) {
 	}
 
 	if len(dummy.Tags) != 1 {
-		t.Errorf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
+		t.Fatalf("typ should have 1 tag, found %v", len(m["dummy"].Tags))
 	}
 
 	if len(dummy.Tags[0].Values) != 1 {
+		fmt.Println(dummy.Tags[0].Values)
 		t.Errorf("Tag should have 1 Item, found %v", len(m["dummy"].Tags[0].Values))
 	}
 
@@ -325,16 +314,17 @@ func TestGetTypes(t *testing.T) {
 	}
 
 	if len(app.Tags[1].Values[0].TypeParameters) != 1 {
-		t.Errorf("TagValue should have 1 TypeParameter, found %v", len(app.Tags[1].Values[0].TypeParameters))
+		t.Fatalf("TagValue should have 1 TypeParameter, found %v", len(app.Tags[1].Values[0].TypeParameters))
 	}
 
 	// filtered types should not show up
 
-	filter := func(f os.FileInfo) bool {
+	conf := &Config{}
+	conf.Filter = func(f os.FileInfo) bool {
 		return !strings.HasPrefix(f.Name(), "dummy")
 	}
 
-	pkgs2, err2 := getPackages("+test", filter)
+	pkgs2, err2 := getPackages("+test", conf)
 
 	if err2 != nil {
 		t.Error(err2)
@@ -357,7 +347,7 @@ func TestGetTypes(t *testing.T) {
 	}
 
 	// no false positives
-	pkgs3, err3 := getPackages("+notreal", nil)
+	pkgs3, err3 := getPackages("+notreal", DefaultConfig)
 
 	typs3 := pkgs3[0].Types
 
@@ -372,11 +362,12 @@ func TestGetTypes(t *testing.T) {
 	// should fail if types can't be evaluated
 	// package.go by itself can't compile since it depends on other types
 
-	filter4 := func(f os.FileInfo) bool {
+	conf4 := &Config{}
+	conf4.Filter = func(f os.FileInfo) bool {
 		return f.Name() == "package.go"
 	}
 
-	_, err4 := getPackages("+test", filter4)
+	_, err4 := getPackages("+test", conf4)
 
 	if err4 == nil {
 		t.Error("should have been unable to evaluate types of incomplete package")
