@@ -3,6 +3,7 @@ package typewriter
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"os"
 	"strings"
 	"testing"
@@ -144,11 +145,13 @@ func TestParse(t *testing.T) {
 		{`// +test foof:"bar,Baz" foof:"qux"`, false, nil, false},
 	}
 
+	fset := token.NewFileSet()
+
 	for i, test := range tests {
 		c := &ast.Comment{
 			Text: test.comment,
 		}
-		pointer, tags, err := parse(c.Text, "+test")
+		pointer, tags, err := parse(fset, c, "+test")
 
 		if test.valid != (err == nil) {
 			t.Errorf("[test %v] valid should have been %v for: %s\n%s", i, test.valid, test.comment, err)

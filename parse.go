@@ -52,14 +52,9 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		specs := getTaggedComments(a, directive)
 
 		for s, c := range specs {
-			pointer, tags, err := parse(c.Text, directive)
+			pointer, tags, err := parse(fset, c, directive)
 
-			// not a typecheck error, must fail
 			if err != nil {
-				// error should have Pos relative to the whole AST
-				err.Pos += c.Slash
-				// Go-style syntax error with filename, line number, column
-				err.msg = fset.Position(err.Pos).String() + ": " + err.Error()
 				return nil, err
 			}
 
@@ -188,6 +183,8 @@ type parsr struct {
 	lex       *lexer
 	token     [2]item // two-token lookahead for parser.
 	peekCount int
+	fset      *token.FileSet
+	offset    token.Pos
 }
 
 // next returns the next token.
@@ -215,11 +212,25 @@ func (p *parsr) peek() item {
 	return p.token[0]
 }
 
-func parse(input, directive string) (Pointer, TagSlice, *SyntaxError) {
+func (p *parsr) errorf(item item, format string, args ...interface{}) error {
+	// some errors come with empty pos
+	format = strings.TrimLeft(format, ":- ")
+	// prepend position information (file name, line, column)
+	format = fmt.Sprintf("%s: %s", p.fset.Position(item.pos+p.offset), format)
+	return fmt.Errorf(format, args...)
+}
+
+func (p *parsr) unexpected(item item) error {
+	return p.errorf(item, "unexpected '%v'", item.val)
+}
+
+func parse(fset *token.FileSet, comment *ast.Comment, directive string) (Pointer, TagSlice, error) {
 	var pointer Pointer
 	var tags TagSlice
 	p := &parsr{
-		lex: lex(input),
+		lex:    lex(comment.Text),
+		fset:   fset,
+		offset: comment.Slash,
 	}
 
 	// to ensure no duplicate tags
@@ -232,7 +243,7 @@ Loop:
 		case itemEOF:
 			break Loop
 		case itemError:
-			err := NewSyntaxError(item, item.val)
+			err := p.errorf(item, item.val)
 			return false, nil, err
 		case itemCommentPrefix:
 			// don't care, move on
@@ -246,13 +257,13 @@ Loop:
 		case itemPointer:
 			// have we already seen a pointer?
 			if pointer {
-				err := NewSyntaxError(item, "second pointer declaration")
+				err := p.errorf(item, "second pointer declaration")
 				return false, nil, err
 			}
 
 			// have we already seen tags? pointer must be first
 			if len(tags) > 0 {
-				err := NewSyntaxError(item, "pointer declaration must precede tags")
+				err := p.errorf(item, "pointer declaration must precede tags")
 				return false, nil, err
 			}
 
@@ -265,7 +276,7 @@ Loop:
 
 			// check for duplicate
 			if _, seen := exists[tag.Name]; seen {
-				err := NewSyntaxError(item, "duplicate tag %q", tag.Name)
+				err := p.errorf(item, "duplicate tag %q", tag.Name)
 				return pointer, nil, err
 			}
 
@@ -288,14 +299,14 @@ Loop:
 
 			tags = append(tags, tag)
 		default:
-			return false, nil, unexpected(item)
+			return false, nil, p.unexpected(item)
 		}
 	}
 
 	return pointer, tags, nil
 }
 
-func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
+func parseTagValues(p *parsr) (bool, []TagValue, error) {
 	var negated bool
 	var vals []TagValue
 
@@ -304,15 +315,15 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 
 		switch item.typ {
 		case itemError:
-			err := NewSyntaxError(item, item.val)
+			err := p.errorf(item, item.val)
 			return false, nil, err
 		case itemEOF:
 			// shouldn't happen within a tag
-			err := NewSyntaxError(item, "expected a close quote")
+			err := p.errorf(item, "expected a close quote")
 			return false, nil, err
 		case itemMinus:
 			if len(vals) > 0 {
-				err := NewSyntaxError(item, "negation must precede tag values")
+				err := p.errorf(item, "negation must precede tag values")
 				return false, nil, err
 			}
 			negated = true
@@ -334,12 +345,12 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 			// we're done
 			return negated, vals, nil
 		default:
-			return false, nil, unexpected(item)
+			return false, nil, p.unexpected(item)
 		}
 	}
 }
 
-func parseTypeParameters(p *parsr) ([]item, *SyntaxError) {
+func parseTypeParameters(p *parsr) ([]item, error) {
 	var result []item
 
 	for {
@@ -352,31 +363,5 @@ func parseTypeParameters(p *parsr) ([]item, *SyntaxError) {
 			p.backup()
 			return result, nil
 		}
-	}
-}
-
-func unexpected(item item) *SyntaxError {
-	return NewSyntaxError(item, "unexpected '%v'", item.val)
-}
-
-type SyntaxError struct {
-	msg string
-	Pos token.Pos
-}
-
-func (e *SyntaxError) Error() string {
-	return strings.TrimLeft(e.msg, ":- ") // some errors try to add empty Pos()
-}
-
-func NewSyntaxError(item item, format string, a ...interface{}) *SyntaxError {
-	var msg string
-	if len(a) > 0 {
-		msg = fmt.Sprintf(format, a)
-	} else {
-		msg = format
-	}
-	return &SyntaxError{
-		msg: msg,
-		Pos: item.pos,
 	}
 }
