@@ -8,7 +8,7 @@ type Tag struct {
 }
 
 type TagValue struct {
-	Name               string
-	TypeParameters     []Type
-	typeParameterNames []string
+	Name           string
+	TypeParameters []Type
+	typeParameters []item
 }

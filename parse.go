@@ -32,22 +32,18 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 	}
 
 	var pkgs []*Package
-	var typeCheckError *TypeCheckError
+	var typeCheckErrors []*TypeCheckError
 
 	for _, a := range astPkgs {
 		pkg, err := getPackage(fset, a, conf)
 
 		if err != nil {
-			// under normal circumstances, err means bail
-			// however, if caller chooses to ignore TypeCheckErrors, continue
-			// (getPackage returns only TypeCheckErrors)
-			if !conf.IgnoreTypeCheckErrors {
-				return nil, err
-			}
+			err.ignored = conf.IgnoreTypeCheckErrors
+			typeCheckErrors = append(typeCheckErrors, err)
 
-			// store the first error for return at bottom
-			if typeCheckError == nil {
-				typeCheckError = err
+			// if we have type check errors, and are not ignoring them, bail
+			if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
+				return pkgs, err
 			}
 		}
 
@@ -58,6 +54,7 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		for s, c := range specs {
 			pointer, tags, err := parse(c.Text, directive)
 
+			// not a typecheck error, must fail
 			if err != nil {
 				// error should have Pos relative to the whole AST
 				err.Pos += c.Slash
@@ -66,32 +63,41 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 				return nil, err
 			}
 
+			// evaluate the annotated type
 			typ, evalErr := pkg.Eval(pointer.String() + s.Name.Name)
 
 			if evalErr != nil {
-				// possibly attributable to type check error
-				if typeCheckError != nil {
-					// combine messages
-					combinedErr := fmt.Errorf("%s\n%s", typeCheckError, evalErr)
-					return pkgs, combinedErr
+				// is it a TypeCheckError?
+				if tc, ok := evalErr.(*TypeCheckError); ok {
+					tc.ignored = conf.IgnoreTypeCheckErrors
+					typeCheckErrors = append(typeCheckErrors, tc)
 				}
-				return pkgs, evalErr
+
+				// if we have type check errors, and are not ignoring them, bail
+				if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
+					return pkgs, err
+				}
 			}
 
-			// do type evaluation on type parameters
+			// evaluate type parameters
 			for _, tag := range tags {
 				for i, val := range tag.Values {
-					for _, name := range val.typeParameterNames {
-						tp, evalErr := pkg.Eval(name)
+					for _, item := range val.typeParameters {
+						tp, evalErr := pkg.Eval(item.val)
+
 						if evalErr != nil {
-							// possibly attributable to type check error
-							if typeCheckError != nil {
-								// combine messages
-								combinedErr := fmt.Errorf("%s\n%s", typeCheckError, evalErr)
-								return pkgs, combinedErr
+							// is it a TypeCheckError?
+							if tc, ok := evalErr.(*TypeCheckError); ok {
+								tc.ignored = conf.IgnoreTypeCheckErrors
+								typeCheckErrors = append(typeCheckErrors, tc)
 							}
-							return pkgs, evalErr
+
+							// if we have type check errors, and are not ignoring them, bail
+							if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
+								return pkgs, err
+							}
 						}
+
 						val.TypeParameters = append(val.TypeParameters, tp)
 					}
 					tag.Values[i] = val // mutate the original
@@ -105,8 +111,9 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		}
 	}
 
-	if typeCheckError != nil {
-		return pkgs, typeCheckError
+	// if we have type check errors, but are ignoring them, output as FYI
+	if err := combine(typeCheckErrors); err != nil && conf.IgnoreTypeCheckErrors {
+		fmt.Println(err)
 	}
 
 	return pkgs, nil
@@ -315,11 +322,11 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 			}
 
 			if p.peek().typ == itemTypeParameter {
-				typs, err := parseTypeParameters(p)
+				tokens, err := parseTypeParameters(p)
 				if err != nil {
 					return false, nil, err
 				}
-				val.typeParameterNames = typs
+				val.typeParameters = tokens
 			}
 
 			vals = append(vals, val)
@@ -332,18 +339,18 @@ func parseTagValues(p *parsr) (bool, []TagValue, *SyntaxError) {
 	}
 }
 
-func parseTypeParameters(p *parsr) ([]string, *SyntaxError) {
-	var typs []string
+func parseTypeParameters(p *parsr) ([]item, *SyntaxError) {
+	var result []item
 
 	for {
 		item := p.next()
 
 		switch item.typ {
 		case itemTypeParameter:
-			typs = append(typs, item.val)
+			result = append(result, item)
 		default:
 			p.backup()
-			return typs, nil
+			return result, nil
 		}
 	}
 }

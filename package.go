@@ -1,6 +1,7 @@
 package typewriter
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -27,11 +28,27 @@ func NewPackage(path, name string) *Package {
 }
 
 type TypeCheckError struct {
-	err error
+	err     error
+	ignored bool
 }
 
 func (t *TypeCheckError) Error() string {
+	if t.ignored {
+		return "[ignored] " + t.err.Error()
+	}
 	return t.err.Error()
+}
+
+func combine(ts []*TypeCheckError) error {
+	if len(ts) == 0 {
+		return nil
+	}
+
+	var errs []string
+	for _, t := range ts {
+		errs = append(errs, t.Error())
+	}
+	return fmt.Errorf(strings.Join(errs, "\n"))
 }
 
 func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *TypeCheckError) {
@@ -56,9 +73,8 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *T
 
 	p := &Package{typesPkg, []Type{}}
 
-	// type-check error is the only error this func can return
 	if err != nil {
-		return p, &TypeCheckError{err}
+		return p, &TypeCheckError{err, conf.IgnoreTypeCheckErrors}
 	}
 
 	return p, nil
@@ -78,6 +94,11 @@ func (p *Package) Eval(name string) (Type, error) {
 		comparable: isComparable(t.Type),
 		numeric:    isNumeric(t.Type),
 		ordered:    isOrdered(t.Type),
+	}
+
+	if isInvalid(t.Type) {
+		err := fmt.Errorf("invalid type: %s", name)
+		return result, &TypeCheckError{err, false}
 	}
 
 	return result, nil

@@ -26,6 +26,11 @@ func isOrdered(typ types.Type) bool {
 	return ok && t.Info()&types.IsOrdered != 0
 }
 
+func isInvalid(typ types.Type) bool {
+	t, ok := typ.Underlying().(*types.Basic)
+	return ok && t.Kind() == types.Invalid
+}
+
 func isPointer(typ types.Type) Pointer {
 	_, ok := typ.Underlying().(*types.Pointer)
 	return Pointer(ok)

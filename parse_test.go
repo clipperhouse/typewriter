@@ -98,20 +98,20 @@ func TestParse(t *testing.T) {
 		{`// +test foo:"bar,Baz[qaz], qux"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil, nil},
-				{"Baz", nil, []string{"qaz"}},
+				{"Baz", nil, []item{{val: "qaz"}}},
 				{"qux", nil, nil},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[[]qaz]"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil, nil},
-				{"Baz", nil, []string{"[]qaz"}},
+				{"Baz", nil, []item{{val: "[]qaz"}}},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz[qaz,hey]" qux:"stuff"`, false, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil, nil},
-				{"Baz", nil, []string{"qaz", "hey"}},
+				{"Baz", nil, []item{{val: "qaz"}, {val: "hey"}}},
 			}, false},
 			{"qux", []TagValue{
 				{"stuff", nil, nil},
@@ -119,11 +119,11 @@ func TestParse(t *testing.T) {
 		}, true},
 		{`// +test foo:"Baz[qaz],yo[dude]" qux:"stuff[things]"`, false, TagSlice{
 			{"foo", []TagValue{
-				{"Baz", nil, []string{"qaz"}},
-				{"yo", nil, []string{"dude"}},
+				{"Baz", nil, []item{{val: "qaz"}}},
+				{"yo", nil, []item{{val: "dude"}}},
 			}, false},
 			{"qux", []TagValue{
-				{"stuff", nil, []string{"things"}},
+				{"stuff", nil, []item{{val: "things"}}},
 			}, false},
 		}, true},
 		{`// +test foo:"bar,Baz`, false, nil, false},
