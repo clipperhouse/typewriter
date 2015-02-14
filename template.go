@@ -24,7 +24,7 @@ func (tmpl *Template) Parse() (*template.Template, error) {
 // TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
 func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	if err := tmpl.TypeConstraint.TryType(t); err != nil {
-		return fmt.Errorf("cannot apply %s to %s: %s", v, t, err)
+		return fmt.Errorf("cannot apply %s to %s: %s", v.Name, t, err)
 	}
 
 	if len(tmpl.TypeParameterConstraints) != len(v.TypeParameters) {
