@@ -163,8 +163,7 @@ func getTaggedComments(pkg *ast.Package, directive string) map[*ast.TypeSpec]*as
 	return specs
 }
 
-// findDirective return the first line of a doc which contains a directive
-// the directive and '//' are removed
+// findAnnotation return the first line of a doc which contains a directive
 func findAnnotation(doc *ast.CommentGroup, directive string) *ast.Comment {
 	if doc == nil {
 		return nil
