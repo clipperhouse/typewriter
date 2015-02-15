@@ -230,12 +230,16 @@ func (p *parsr) errorf(item item, format string, args ...interface{}) error {
 	// some errors come with empty pos
 	format = strings.TrimLeft(format, ":- ")
 	// prepend position information (file name, line, column)
-	format = fmt.Sprintf("%s: %s", p.fset.Position(item.pos+p.offset), format)
+	format = fmt.Sprintf("%s: %s", p.position(item), format)
 	return fmt.Errorf(format, args...)
 }
 
 func (p *parsr) unexpected(item item) error {
 	return p.errorf(item, "unexpected '%v'", item.val)
+}
+
+func (p *parsr) position(item item) token.Position {
+	return p.fset.Position(item.pos + p.offset)
 }
 
 func parse(fset *token.FileSet, comment *ast.Comment, directive string) (Pointer, TagSlice, error) {
