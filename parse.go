@@ -38,13 +38,13 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		pkg, err := getPackage(fset, a, conf)
 
 		if err != nil {
-			err.ignored = conf.IgnoreTypeCheckErrors
-			typeCheckErrors = append(typeCheckErrors, err)
-
-			// if we have type check errors, and are not ignoring them, bail
-			if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
+			// if we're not ignoring, can return immediately, normal behavior
+			if !conf.IgnoreTypeCheckErrors {
 				return pkgs, err
 			}
+
+			err.ignored = conf.IgnoreTypeCheckErrors
+			typeCheckErrors = append(typeCheckErrors, err)
 		}
 
 		pkgs = append(pkgs, pkg)
