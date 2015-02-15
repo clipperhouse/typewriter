@@ -62,16 +62,23 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 			typ, evalErr := pkg.Eval(pointer.String() + s.Name.Name)
 
 			if evalErr != nil {
-				// is it a TypeCheckError?
-				if tc, ok := evalErr.(*TypeCheckError); ok {
-					tc.ignored = conf.IgnoreTypeCheckErrors
-					typeCheckErrors = append(typeCheckErrors, tc)
+				// if we're not ignoring, can return immediately, normal behavior
+				if !conf.IgnoreTypeCheckErrors {
+					return pkgs, evalErr
 				}
 
-				// if we have type check errors, and are not ignoring them, bail
-				if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
-					return pkgs, err
+				// is it a TypeCheckError?
+				tc, isTypeCheckError := evalErr.(*TypeCheckError)
+
+				// if not a TypeCheckError, can return immediately, normal behavior
+				if !isTypeCheckError {
+					return pkgs, evalErr
 				}
+
+				tc.ignored = conf.IgnoreTypeCheckErrors
+				tc.addPos(fset, s.Pos())
+
+				typeCheckErrors = append(typeCheckErrors, tc)
 			}
 
 			// evaluate type parameters
@@ -81,16 +88,23 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 						tp, evalErr := pkg.Eval(item.val)
 
 						if evalErr != nil {
-							// is it a TypeCheckError?
-							if tc, ok := evalErr.(*TypeCheckError); ok {
-								tc.ignored = conf.IgnoreTypeCheckErrors
-								typeCheckErrors = append(typeCheckErrors, tc)
+							// if we're not ignoring, can return immediately, normal behavior
+							if !conf.IgnoreTypeCheckErrors {
+								return pkgs, evalErr
 							}
 
-							// if we have type check errors, and are not ignoring them, bail
-							if err := combine(typeCheckErrors); err != nil && !conf.IgnoreTypeCheckErrors {
-								return pkgs, err
+							// is it a TypeCheckError?
+							tc, isTypeCheckError := evalErr.(*TypeCheckError)
+
+							// if not a TypeCheckError, can return immediately, normal behavior
+							if !isTypeCheckError {
+								return pkgs, evalErr
 							}
+
+							tc.ignored = conf.IgnoreTypeCheckErrors
+							tc.addPos(fset, item.pos+c.Slash)
+
+							typeCheckErrors = append(typeCheckErrors, tc)
 						}
 
 						val.TypeParameters = append(val.TypeParameters, tp)
@@ -294,7 +308,6 @@ Loop:
 
 				tag.Negated = negated
 				tag.Values = vals
-
 			}
 
 			tags = append(tags, tag)

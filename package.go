@@ -33,10 +33,18 @@ type TypeCheckError struct {
 }
 
 func (t *TypeCheckError) Error() string {
+	var result string
 	if t.ignored {
-		return "[ignored] " + t.err.Error()
+		result += "[ignored] "
 	}
-	return t.err.Error()
+	return result + t.err.Error()
+}
+
+func (t *TypeCheckError) addPos(fset *token.FileSet, pos token.Pos) {
+	// some errors come with empty pos
+	err := strings.TrimLeft(t.err.Error(), ":- ")
+	// prepend position information (file name, line, column)
+	t.err = fmt.Errorf("%s: %s", fset.Position(pos), err)
 }
 
 func combine(ts []*TypeCheckError) error {
