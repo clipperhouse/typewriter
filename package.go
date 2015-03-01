@@ -102,6 +102,7 @@ func (p *Package) Eval(name string) (Type, error) {
 		comparable: isComparable(t.Type),
 		numeric:    isNumeric(t.Type),
 		ordered:    isOrdered(t.Type),
+		Type:       t.Type,
 	}
 
 	if isInvalid(t.Type) {

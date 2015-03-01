@@ -2,6 +2,8 @@ package typewriter
 
 import (
 	"testing"
+
+	"golang.org/x/tools/go/types"
 )
 
 func TestEval(t *testing.T) {
@@ -36,6 +38,11 @@ func TestEval(t *testing.T) {
 
 	if t1.ordered {
 		t.Errorf("'app' is not an ordered type")
+	}
+
+	// embedded types.Type should be accessible via type assertion
+	if _, ok := t1.Underlying().(*types.Struct); !ok {
+		t.Errorf("unable to assert %s as a *types.Struct", t1)
 	}
 
 	s2 := "*App"
