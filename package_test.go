@@ -41,8 +41,13 @@ func TestEval(t *testing.T) {
 	}
 
 	// embedded types.Type should be accessible via type assertion
-	if _, ok := t1.Underlying().(*types.Struct); !ok {
+	tt1, ok1 := t1.Underlying().(*types.Struct)
+	if !ok1 {
 		t.Errorf("unable to assert %s as a *types.Struct", t1)
+	}
+
+	if tt1.NumFields() != 3 {
+		t.Errorf("%s should have 3 fields", tt1)
 	}
 
 	s2 := "*App"
