@@ -11,6 +11,7 @@ import (
 // +gen * slice:"Where"
 type Template struct {
 	Name, Text     string
+	FuncMap        map[string]interface{}
 	TypeConstraint Constraint
 	// Indicates both the number of required type parameters, and the constraints of each (if any)
 	TypeParameterConstraints []Constraint
@@ -18,7 +19,7 @@ type Template struct {
 
 // Parse parses (converts) a typewriter.Template to a *template.Template
 func (tmpl *Template) Parse() (*template.Template, error) {
-	return template.New(tmpl.Name).Parse(tmpl.Text)
+	return template.New(tmpl.Name).Funcs(tmpl.FuncMap).Parse(tmpl.Text)
 }
 
 // TryTypeAndValue verifies that a given Type and TagValue satisfy a Template's type constraints.
@@ -40,6 +41,13 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 	}
 
 	return nil
+}
+
+// Funcs assigns non standard functions used in the template
+func (ts TemplateSlice) Funcs(FuncMap map[string]interface{}) {
+	for _, tmpl := range ts {
+		tmpl.FuncMap = FuncMap
+	}
 }
 
 // ByTag attempts to locate a template which meets type constraints, and parses it.
