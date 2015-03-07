@@ -2,6 +2,7 @@ package typewriter
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 )
 
@@ -395,5 +396,37 @@ func TestByTagValue(t *testing.T) {
 
 	if b.String() != slice4[2].Text { // "This should be found."
 		t.Error("should have picked the template which matches type constraints")
+	}
+
+	// template funcs
+	slice5 := TemplateSlice{
+		{
+			Name: "TestValue",
+			Text: "This {{ToLower}} should compile.",
+		},
+		{
+			Name: "SomethingElse",
+			Text: "This should compile.",
+		},
+	}
+
+	typ5 := Type{
+		Name: "TestType",
+	}
+
+	v5 := TagValue{
+		Name: "TestValue",
+	}
+
+	slice5.Funcs(map[string]interface{}{
+		"ToLower": func(t Type) string {
+			return strings.ToLower(t.Name)
+		},
+	})
+
+	_, err5 := slice5.ByTagValue(typ5, v5)
+
+	if err5 != nil {
+		t.Error(err5)
 	}
 }
