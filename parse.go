@@ -23,8 +23,10 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 		return ignored(f)
 	}
 
-	// get the AST
+	// Get the AST from the files in the current directory
 	fset := token.NewFileSet()
+
+	// The parser.ParseComments is a constant indicating "parse comments and add them to AST"
 	astPkgs, err := parser.ParseDir(fset, "./", filt, parser.ParseComments)
 
 	if err != nil {
@@ -34,6 +36,8 @@ func getPackages(directive string, conf *Config) ([]*Package, error) {
 	var pkgs []*Package
 	var typeCheckErrors []*TypeCheckError
 
+	// For each package ast nodes, filter the tagged comments and parse the
+	// annotation from them.
 	for _, a := range astPkgs {
 		pkg, err := getPackage(fset, a, conf)
 
@@ -238,6 +242,9 @@ func (p *parsr) unexpected(item item) error {
 	return p.errorf(item, "unexpected '%v'", item.val)
 }
 
+/*
+The annotation parser for tagged comments
+*/
 func parse(fset *token.FileSet, comment *ast.Comment, directive string) (Pointer, TagSlice, error) {
 	var pointer Pointer
 	var tags TagSlice
