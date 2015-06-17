@@ -15,16 +15,18 @@ type evaluator interface {
 	Eval(string) (Type, error)
 }
 
-type Package struct {
-	*types.Package
-	Types []Type
-}
-
 func NewPackage(path, name string) *Package {
 	return &Package{
 		types.NewPackage(path, name),
+		token.NewFileSet(),
 		[]Type{},
 	}
+}
+
+type Package struct {
+	*types.Package
+	fset  *token.FileSet
+	Types []Type
 }
 
 type TypeCheckError struct {
@@ -79,7 +81,7 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *T
 
 	typesPkg, err := config.Check(a.Name, fset, files, nil)
 
-	p := &Package{typesPkg, []Type{}}
+	p := &Package{typesPkg, fset, []Type{}}
 
 	if err != nil {
 		return p, &TypeCheckError{err, conf.IgnoreTypeCheckErrors}
@@ -91,7 +93,7 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *T
 func (p *Package) Eval(name string) (Type, error) {
 	var result Type
 
-	t, err := types.Eval(name, p.Package, p.Scope())
+	t, err := types.Eval(p.fset, p.Package, token.NoPos, name)
 	if err != nil {
 		return result, err
 	}
