@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	// gcimporter implements Import for gc-generated files
-	_ "golang.org/x/tools/go/gcimporter"
-	"golang.org/x/tools/go/types"
+	"go/types"
+
+	_ "golang.org/x/tools/go/gcimporter15"
 )
 
 type evaluator interface {

@@ -2,10 +2,9 @@ package typewriter
 
 import (
 	"fmt"
+	"go/types"
 	"regexp"
 	"strings"
-
-	"golang.org/x/tools/go/types"
 )
 
 type Type struct {

@@ -1,9 +1,8 @@
 package typewriter
 
 import (
+	"go/types"
 	"testing"
-
-	"golang.org/x/tools/go/types"
 )
 
 func TestEval(t *testing.T) {

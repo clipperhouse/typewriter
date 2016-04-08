@@ -3,7 +3,6 @@ package typewriter
 import (
 	"fmt"
 	"strings"
-
 	"text/template"
 )
 

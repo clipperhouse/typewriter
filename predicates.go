@@ -9,7 +9,7 @@
 package typewriter
 
 import (
-	"golang.org/x/tools/go/types"
+	"go/types"
 )
 
 func isComparable(typ types.Type) bool {
