@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"golang.org/x/tools/go/types"
+	"go/types"
 )
 
 type Type struct {
