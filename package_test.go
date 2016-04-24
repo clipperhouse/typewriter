@@ -3,7 +3,7 @@ package typewriter
 import (
 	"testing"
 
-	"golang.org/x/tools/go/types"
+	"go/types"
 )
 
 func TestEval(t *testing.T) {
