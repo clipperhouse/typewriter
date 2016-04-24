@@ -7,9 +7,8 @@ import (
 	"strings"
 
 	// gcimporter implements Import for gc-generated files
+	"go/importer"
 	"go/types"
-
-	_ "golang.org/x/tools/go/gcimporter15"
 )
 
 type evaluator interface {
@@ -72,6 +71,7 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *T
 	config := types.Config{
 		DisableUnusedImportCheck: true,
 		IgnoreFuncBodies:         true,
+		Importer:                 importer.Default(),
 	}
 
 	if conf.IgnoreTypeCheckErrors {
