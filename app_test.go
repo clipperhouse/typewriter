@@ -107,7 +107,7 @@ func TestWrite(t *testing.T) {
 	}
 
 	var b bytes.Buffer
-	write(&b, a, p, typ, &fooWriter{})
+	write(&b, a, p, []Type{typ}, &fooWriter{})
 
 	// make sure the critical bits actually get written
 
@@ -124,6 +124,103 @@ func TestWrite(t *testing.T) {
 	if !strings.Contains(s, "func pointlesssometype()") {
 		t.Errorf("Write did not write func as expected")
 	}
+}
+
+func TestWriteAllOneFile(t *testing.T) {
+	var written []string
+	var err error
+
+	// set up some registered typewriters for this app
+	fw1 := &fooWriter{}
+
+	// no error checking here, see TestRegister
+	Register(fw1)
+
+	var c Config
+	c.OneFile = true
+
+	a1, err := c.NewApp("+test")
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	p1 := a1.Packages[0]
+
+	written, err = a1.WriteAll()
+	cleanup(written) // we don't need the written files
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(written) != 1 {
+		t.Errorf(".WriteAll() should have written 1 file, wrote %d files", len(written))
+	}
+
+	if fw1.writeCalls != len(p1.Types) {
+		t.Errorf(".Write() should have been called %v times (once for each type); was called %v", len(p1.Types), fw.writeCalls)
+	}
+
+	// clear 'em out
+	typeWriters = make([]Interface, 0)
+
+	// new set of writers for this test
+
+	fw2 := &fooWriter{}
+	bw2 := &barWriter{}
+	ew2 := &errWriter{}
+
+	Register(fw2)
+	Register(bw2)
+	Register(ew2)
+
+	a2, _ := NewApp("+test") // error checked above, ignore here
+
+	written, err = a2.WriteAll()
+	cleanup(written) // we don't need the written files
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if fw.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", fw.writeCalls)
+	}
+
+	if bw.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", bw.writeCalls)
+	}
+
+	if ew.writeCalls != 0 {
+		t.Errorf(".Write() should have been called no times due to error in validation; was called %v", ew.writeCalls)
+	}
+
+	// clear 'em out
+	typeWriters = make([]Interface, 0)
+
+	// new set of writers for this test
+
+	fw3 := &fooWriter{}
+	jw3 := &junkWriter{}
+	bw3 := &barWriter{}
+
+	Register(fw3)
+	Register(jw3)
+	Register(bw3)
+
+	a3, _ := NewApp("+test") // error checked above, ignore here
+
+	written, err = a3.WriteAll()
+	cleanup(written) // we don't need the written files
+
+	if err == nil {
+		t.Errorf("writer producing invalid Go code should return an error")
+	}
+
+	// clear 'em out for later tests
+	typeWriters = make([]Interface, 0)
 }
 
 func cleanup(files []string) {

@@ -20,6 +20,7 @@ func NewPackage(path, name string) *Package {
 		types.NewPackage(path, name),
 		token.NewFileSet(),
 		[]Type{},
+		false,
 	}
 }
 
@@ -27,6 +28,8 @@ type Package struct {
 	*types.Package
 	fset  *token.FileSet
 	Types []Type
+
+	singleFile bool
 }
 
 type TypeCheckError struct {
@@ -82,7 +85,7 @@ func getPackage(fset *token.FileSet, a *ast.Package, conf *Config) (*Package, *T
 
 	typesPkg, err := config.Check(a.Name, fset, files, nil)
 
-	p := &Package{typesPkg, fset, []Type{}}
+	p := &Package{typesPkg, fset, []Type{}, conf.OneFile}
 
 	if err != nil {
 		return p, &TypeCheckError{err, conf.IgnoreTypeCheckErrors}
