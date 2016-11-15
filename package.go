@@ -98,6 +98,10 @@ func (p *Package) Eval(name string) (Type, error) {
 	if err != nil {
 		return result, err
 	}
+	if t.Type == nil {
+		err := fmt.Errorf("invalid type: %s", name)
+		return result, &TypeCheckError{err, false}
+	}
 
 	result = Type{
 		Pointer:    isPointer(t.Type),
