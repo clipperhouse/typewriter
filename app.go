@@ -96,7 +96,7 @@ func (a *App) WriteAll() ([]string, error) {
 				}
 
 				// append _test to file name if the source type is in a _test.go file
-				f := strings.ToLower(fmt.Sprintf("%s_%s%s.go", t.Name, tw.Name(), t.test))
+				f := strings.ToLower(fmt.Sprintf("zz_%s_%s%s.go", t.Name, tw.Name(), t.test))
 
 				buffers[f] = &b
 			}
