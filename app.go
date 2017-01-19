@@ -11,6 +11,8 @@ import (
 	"strings"
 	"text/template"
 
+	"sort"
+
 	"golang.org/x/tools/imports"
 )
 
@@ -87,6 +89,10 @@ func (a *App) WriteAll() ([]string, error) {
 		if p.singleFile {
 			// TODO: split up non test types from test types within the package
 			for _, tw := range a.TypeWriters {
+
+				// Sort types so that they always appear in stable order in the output file
+				sort.Sort(typeByName(p.Types))
+
 				var b bytes.Buffer
 				n, err := write(&b, a, p, p.Types, tw)
 
