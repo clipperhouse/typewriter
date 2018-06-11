@@ -36,7 +36,7 @@ func (tmpl *Template) TryTypeAndValue(t Type, v TagValue) error {
 		c := tmpl.TypeParameterConstraints[i]
 		tp := v.TypeParameters[i]
 		if err := c.TryType(tp); err != nil {
-			return fmt.Errorf("cannot apply %s on %s: %s", v, t, err)
+			return fmt.Errorf("cannot apply %v on %s: %s", v, t, err)
 		}
 	}
 
