@@ -1,4 +1,4 @@
-##What’s this?
+## What’s this?
 
 Typewriter is a package to enable pluggable, type-driven codegen for Go. The envisioned use case is for generics-like functionality. This package forms the underpinning of [gen](https://github.com/clipperhouse/gen).
 
