@@ -66,3 +66,18 @@ func (p Pointer) String() string {
 	}
 	return ""
 }
+
+// alias for sorting Type slices by name
+type typeByName []Type
+
+func (tx typeByName) Len() int {
+	return len(tx)
+}
+
+func (tx typeByName) Less(i, j int) bool {
+	return tx[i].Name < tx[j].Name
+}
+
+func (tx typeByName) Swap(i, j int) {
+	tx[i], tx[j] = tx[j], tx[i]
+}
