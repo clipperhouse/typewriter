@@ -339,5 +339,5 @@ func isIdentifierPrefix(r rune) bool {
 // isTypeDecl reports whether r a character legal in a type declaration, eg map[*Thing]interface{}
 // brackets are a special case, handled in lexTypeParameter
 func isTypeDecl(r rune) bool {
-	return r == '*' || r == '{' || r == '}' || r == '[' || r == ']' || isAlphaNumeric(r)
+	return r == '*' || r == '{' || r == '}' || r == '[' || r == ']' || isAlphaNumeric(r) || r == '.'
 }
