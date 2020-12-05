@@ -69,6 +69,30 @@ func TestParse(t *testing.T) {
 				{"Baz", nil, nil},
 			}, false},
 		}, true},
+
+		// Allow * in tag values to denote "all applicable methods"
+		{`// +test foo:"*"`, false, TagSlice{
+			{"foo", []TagValue{
+				{"*", nil, nil},
+			}, false},
+		}, true},
+		{`// +test foo:"*,Bar"`, false, TagSlice{
+			{"foo", []TagValue{
+				{"*", nil, nil},
+				{"Bar", nil, nil},
+			}, false},
+		}, true},
+		{`// +test foo:"Bar,*"`, false, TagSlice{
+			{"foo", []TagValue{
+				{"Bar", nil, nil},
+				{"*", nil, nil},
+			}, false},
+		}, true},
+
+		// * should not be part of identifiers
+		{`// +test foo:"*a"`, false, nil, false},
+		{`// +test foo:"a*"`, false, nil, false},
+
 		{`// +test * foo:"bar,Baz"`, true, TagSlice{
 			{"foo", []TagValue{
 				{"bar", nil, nil},

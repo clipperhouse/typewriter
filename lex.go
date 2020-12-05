@@ -177,6 +177,14 @@ func lexTag(l *lexer) stateFn {
 func lexTagValues(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
+		case r == '*':
+			r2 := l.peek()
+			// r2 has to be either , or ".
+			if !(r2 == ',' || r2 == '"') {
+				return l.errorf("Expected a , or \" after * tag value. Got '%s'", string(r))
+			}
+			l.emit(itemTagValue)
+			return lexTagValues
 		case r == '-':
 			l.emit(itemMinus)
 		case isIdentifierPrefix(r):
